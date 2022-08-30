@@ -1,4 +1,3 @@
-from pydoc import describe
 from flask_restx import fields
 from src.server.instance import server
 

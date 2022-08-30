@@ -6,9 +6,9 @@ class Server():
         self.app = Flask(__name__)
         self.api = Api(self.app,
                        version='1.0',
-                       title='User Story Validador',
-                       description='A user story validator using NLP',
-                       doc='/docs')
+                       title='Analisador de História de Usuário com PLN',
+                       description='API voltada para análise de Histórias de Usuário utilizando Processamento de Linguagem Natural. \n Tecnologias utilizadas: NLTK e spaCy',
+                       doc='/analisador')
         
     def run(self, ):
         self.app.run(
