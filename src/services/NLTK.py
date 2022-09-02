@@ -1,7 +1,9 @@
+from src.classes.Response import Response
+
 class NLTK:
     def processarHistoria(idioma:str, historia:str):
-        return 'Idioma selecionado: ' + idioma + ', História a ser processada: ' + historia + ', Tecnologia utilizada: NLTK'
+        return Response(historia, 'NLTK', 'TESTE', True, True, True, 'TESTE', 'TESTE', 'TESTE', None)
     
     def processarCenario(idioma:str, cenario:str):
-        return 'Idioma selecionado: ' + idioma + ', Cenário a ser processado: ' + cenario + ', Tecnologia utilizada: NLTK'
+        return Response(cenario, 'NLTK', 'TESTE', True, True, True, 'TESTE', 'TESTE', 'TESTE', None)
     
