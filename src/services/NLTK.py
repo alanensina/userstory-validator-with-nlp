@@ -1,8 +1,10 @@
 import nltk, joblib
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
-from src.classes.Response import Response
 from nltk.tokenize import word_tokenize, sent_tokenize
+from src.classes.Response import Response
+from src.classes.Palavra import Palavra
+from src.classes import Tagset
 
 class NLTK:
     
@@ -23,8 +25,6 @@ class NLTK:
             tokens_sentencas = sent_tokenize(sentenca)
         elif idioma == 'ptbr':
             tokens_sentencas = sent_tokenize(sentenca, language='portuguese')
-        else:
-            return 'Idioma inválido'
         
         # Tokenização das palavras
         for token in tokens_sentencas:
@@ -61,6 +61,65 @@ class NLTK:
     def processar(texto:str, idioma:str):
         tokens_palavras = NLTK.tokenizar(texto, idioma)
         lemas = NLTK.lematizar(tokens_palavras)
-        tags = NLTK.tagging(lemas, idioma)
-        print(tags)
-        return tags    
+        pre_tags = NLTK.tagging(lemas, idioma)
+        tags = NLTK.unificar_tagset(pre_tags)
+        #TODO: remover depois:
+        for tag in tags:
+            print(tag)
+        return tags
+    
+    def unificar_tagset(tags):
+        tagsets = []
+        for tupla in tags:
+            palavra = tupla[0]  
+            tagset = tupla[1]  
+            classe = NLTK.get_classe_gramatical(tagset)
+            tagsets.append(Palavra(palavra, tagset, classe))        
+        return tagsets
+    
+    # Função responsável em retornar a classe gramatical conforme o tagset
+    def get_classe_gramatical(tagset):
+          if tagset == 'ART' or tagset == 'DET':
+              return Tagset.ARTIGO
+          elif tagset == 'ADJ':
+              return Tagset.ADJETIVO
+          elif tagset == 'N' or tagset == 'NOUN':
+              return Tagset.SUBSTANTIVO
+          elif tagset == 'NPROP':
+              return Tagset.SUBSTANTIVO_P
+          elif tagset == 'NUM':
+              return Tagset.NUMERAL
+          elif tagset == 'PROADJ':
+              return Tagset.PRONOME_ADJ
+          elif tagset == 'PROSUB':
+              return Tagset.PRONOME_SUBS
+          elif tagset == 'PROPESS':
+              return Tagset.PRONOME_PESS
+          elif tagset == 'PRO-KS':
+              return Tagset.PRONOME_CON
+          elif tagset == 'ADV':
+              return Tagset.ADVERBIO
+          elif tagset == 'ADV-KS':
+              return Tagset.ADVERBIO_CON_SUBORD
+          elif tagset == 'ADV-KS-REL':
+              return Tagset.ADVERBIO_REL_SUBORD
+          elif tagset == 'KC':
+              return Tagset.CONJUNCAO_COORD
+          elif tagset == 'KS':
+              return Tagset.CONJUNCAO_COORD
+          elif tagset == 'PREP':
+              return Tagset.PREPOSICAO
+          elif tagset == 'IN':
+              return Tagset.INTERJEICAO
+          elif tagset == 'V' or tagset == 'VERB':
+              return Tagset.VERBO
+          elif tagset == 'VAUX':
+              return Tagset.VERBO_AUX
+          elif tagset == 'PCP':
+              return Tagset.PARTICIPIO
+          elif tagset == 'PDEN':
+              return Tagset.PALAVRA_DEN
+          elif tagset == 'CUR':
+              return Tagset.MOEDA        
+          else:
+              return Tagset.INVALIDO
