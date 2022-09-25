@@ -1,5 +1,5 @@
 from xmlrpc.client import Boolean
-import nltk, joblib
+import nltk, joblib, timeit
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -10,19 +10,21 @@ from src.classes import Constantes
 class NLTK:
     
     def processarHistoria(idioma:str, historia:str):
-        tempo = 'TEMPO' # Iniciar contagem
-        texto_processado = NLTK.processar(historia, idioma)
+        start = timeit.default_timer()  
         
-        bem_formada = NLTK.verifica_criterio_um(texto_processado)
-        atomica = NLTK.verifica_criterio_dois(texto_processado)
-        minima = NLTK.verifica_criterio_tres(texto_processado)
+        bem_formada = NLTK.verifica_criterio_um(historia, idioma)
+        atomica = NLTK.verifica_criterio_dois(historia, idioma)
+        minima = NLTK.verifica_criterio_tres(historia, bem_formada)
         erros = NLTK.verifica_erros(bem_formada, atomica, minima)  
         
         ator = NLTK.retorna_ator(historia, idioma)    
         acao = NLTK.retorna_acao(historia, idioma)      
-        finalidade = NLTK.retorna_finalidade(historia, idioma)        
+        finalidade = NLTK.retorna_finalidade(historia, idioma)      
         
-        tempo = 'TEMPO' # Finalizar contagem
+        end = timeit.default_timer()  
+        
+        tempo = NLTK.formatar_tempo(start, end)
+        
         return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
     
     def processarCenario(idioma:str, cenario:str):
@@ -75,12 +77,7 @@ class NLTK:
         tokens_palavras = NLTK.tokenizar(texto, idioma)
         lemas = NLTK.lematizar(tokens_palavras)
         pre_tags = NLTK.tagging(lemas, idioma)
-        tags = NLTK.unificar_tagset(pre_tags)
-        
-        #TODO: remover depois:
-        #for tag in tags:
-         #   print(tag)
-        return tags
+        return NLTK.unificar_tagset(pre_tags)
     
     def unificar_tagset(tags):
         tagsets = []
@@ -154,18 +151,18 @@ class NLTK:
     # Verbo -> Verbo
     # Objeto indireto (opcional) -> Substantivo ou pronome
     # Objeto direto -> Substantivo ou pronome
-    def verifica_criterio_um(tagsets):
+    def verifica_criterio_um(texto, idioma):
         
             
             
         
         
-        return True
+        return False
     
     
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Uma história é atômica quando há apenas um objetivo na tarefa
-    def verifica_criterio_dois(tagsets):
+    def verifica_criterio_dois(texto, idioma):
         
         
         
@@ -176,14 +173,13 @@ class NLTK:
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
     # e descrição esperada do comportamento deverá ser deixada de lado.
-    def verifica_criterio_tres(tagsets):
+    def verifica_criterio_tres(texto, bem_formada):
+        sentencas = NLTK.separar_sentencas(texto)
         
+        if bem_formada and len(sentencas) <= 3:
+            return True
         
-        
-        
-        
-        
-        return True
+        return False
     
     def verifica_erros(bem_formada, atomica, minima):
         erros = ''
@@ -247,10 +243,12 @@ class NLTK:
                     else:
                         finalidade = finalidade + ' ' + tag.palavra 
         
-        
         return finalidade
     
     
     def separar_sentencas(texto):
         return texto.split(',')  
+    
+    def formatar_tempo(start, end):
+        return round(end - start, 3).__str__().replace('.',',') + ' segundos'
             
