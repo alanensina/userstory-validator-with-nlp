@@ -16,3 +16,8 @@ PALAVRA_DEN = 'PALAVRA DENOTATIVA'
 MOEDA = 'SÍMBOLO DA MOEDA CORRENTE'
 NLTK = 'NLTK'
 SPACY = 'spaCy'
+
+# Mensagens de erro
+ERRO_ATOR_INCONSISTENTE = 'Erro de inconsistência no template de validação do ator da história de usuário.'
+ERRO_ACAO_INCONSISTENTE = 'Erro de inconsistência no template de validação da ação da história de usuário.'
+ERRO_FINALIDADE_INCONSISTENTE = 'Erro de inconsistência no template de validação da finalidade da história de usuário.'

@@ -15,11 +15,13 @@ class NLTK:
         bem_formada = NLTK.verifica_criterio_um(historia, idioma)
         atomica = NLTK.verifica_criterio_dois(historia, idioma)
         minima = NLTK.verifica_criterio_tres(historia, bem_formada)
-        erros = NLTK.verifica_erros(bem_formada, atomica, minima)  
-        
         ator = NLTK.retorna_ator(historia, idioma)    
         acao = NLTK.retorna_acao(historia, idioma)      
-        finalidade = NLTK.retorna_finalidade(historia, idioma)      
+        finalidade = NLTK.retorna_finalidade(historia, idioma)  
+        erros = NLTK.verifica_erros(bem_formada, atomica, minima, ator, acao, finalidade)   
+        ator = NLTK.limpar_mensagem_de_erro(ator)
+        acao = NLTK.limpar_mensagem_de_erro(acao)   
+        finalidade = NLTK.limpar_mensagem_de_erro(finalidade)      
         
         end = timeit.default_timer()  
         
@@ -144,6 +146,7 @@ class NLTK:
     
     # Função responsável para verificar o primeiro critério de qualidade: Bem formada
     # Uma história é bem formada quando há o seguinte formato: Quem realizará a tarefa + objetivo da tarefa + finalidade para a realização da tarefa (opcional)
+    # A história deve ter no mínimo 2 sentenças (uma para o ator + uma para a ação)
     # Formato esperado: Sujeito + Adjetivo (opcional) + Verbo + Objeto indireto (opcional) + Objeto direto
     # Formato das tagsets:
     # Sujeito -> Substantivo ou pronome
@@ -152,22 +155,42 @@ class NLTK:
     # Objeto indireto (opcional) -> Substantivo ou pronome
     # Objeto direto -> Substantivo ou pronome
     def verifica_criterio_um(texto, idioma):
+        sentencas = NLTK.separar_sentencas(texto)
         
-            
-            
+        if len(sentencas) < 2:
+            return False
         
+        ator = NLTK.retorna_ator(texto, idioma)
+        acao = NLTK.retorna_acao(texto, idioma)
+        finalidade =  NLTK.retorna_finalidade(texto, idioma)
+        
+        if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
+            return True
         
         return False
     
     
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Uma história é atômica quando há apenas um objetivo na tarefa
+    # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a partir da segunda sentença ela se enquadra no templete de ação
+    # Caso mais que uma sentença se enquadre no templete de ação, a história de usuário não será atômica
     def verifica_criterio_dois(texto, idioma):
+        sentencas = NLTK.separar_sentencas(texto)
+        acoes_validas = 0
         
+        if len(sentencas) < 2:
+            return False
         
+        x = 1 # 0 seria a sentença do ator
         
-        
-        return True
+        for x in len(sentencas):
+            sentenca = sentencas[x]
+            acao = NLTK.retorna_acao(sentenca, idioma)
+            
+            if acao != Constantes.ERRO_ACAO_INCONSISTENTE:
+                acoes_validas = acoes_validas + 1
+            
+        return acoes_validas > 0 and acoes_validas < 2
     
     
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
@@ -181,18 +204,24 @@ class NLTK:
         
         return False
     
-    def verifica_erros(bem_formada, atomica, minima):
+    def verifica_erros(bem_formada, atomica, minima, ator, acao, finalidade):
         erros = ''
         if not bem_formada:
             erros = 'A história não atende o primeiro critério de qualidade que é Bem formada. '
         if not atomica:
             erros = erros + 'A história não atende o segundo critério de qualidade que é Atômica. '
         if not minima:
-            erros = erros + 'A história não atende o terceiro critério de qualidade que é Mínima.'
-        if bem_formada and atomica and minima:
+            erros = erros + 'A história não atende o terceiro critério de qualidade que é Mínima. '
+        if ator == Constantes.ERRO_ATOR_INCONSISTENTE:
+            erros = erros + Constantes.ERRO_ATOR_INCONSISTENTE + ' '
+        if acao == Constantes.ERRO_ACAO_INCONSISTENTE:
+            erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE + ' '
+        if finalidade == Constantes.ERRO_FINALIDADE_INCONSISTENTE:
+            erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE + ' '
+        if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return None
-        else:
-            return erros
+        
+        return erros
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # o ator deverá ser identificado na primeira sentença
@@ -202,15 +231,26 @@ class NLTK:
         sentenca = sentencas[0]
         tags = NLTK.processar(sentenca, idioma)
         
+        substantivo = False
+        pronome = False
+        
         for tag in tags:
             if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO:
                 if ator == '':
                     ator = tag.palavra
                 else:
                     ator = ator + ' ' + tag.palavra
+            
+            if tag.classe == Constantes.SUBSTANTIVO:
+                substantivo = True
+            elif tag.classe == Constantes.PRONOME:
+                pronome = True
+                    
+        if substantivo and pronome:
+            return ator
+        else:
+            return Constantes.ERRO_ATOR_INCONSISTENTE
         
-        return ator
-    
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a ação deverá ser identificado na segunda sentença
     def retorna_acao(texto, idioma):
@@ -218,20 +258,43 @@ class NLTK:
         sentencas = NLTK.separar_sentencas(texto)
         sentenca = sentencas[1]
         tags = NLTK.processar(sentenca, idioma)
+        
+        verbo = False
+        substantivo = False
+        pronome = False
+        preposicao = False
+        
         for tag in tags:
             if tag.classe == Constantes.VERBO or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
                 if acao == '':
                     acao = tag.palavra
                 else:
-                    acao = acao + ' ' + tag.palavra        
-        
-        return acao
+                    acao = acao + ' ' + tag.palavra
+            
+            if tag.classe == Constantes.VERBO:
+                verbo = True
+            elif tag.classe == Constantes.SUBSTANTIVO:
+                substantivo = True
+            elif tag.classe == Constantes.PRONOME:
+                pronome = True
+            elif tag.classe == Constantes.PREPOSICAO:
+                preposicao = True
+            
+        if verbo and substantivo and pronome and preposicao:        
+            return acao
+        else:
+            return Constantes.ERRO_ACAO_INCONSISTENTE
     
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
     def retorna_finalidade(texto, idioma):
         finalidade = ''
         sentencas = NLTK.separar_sentencas(texto)
+        
+        verbo = False
+        substantivo = False
+        pronome = False
+        preposicao = False
         
         if sentencas.__sizeof__() >= 3:
             sentenca = sentencas[2]
@@ -242,8 +305,22 @@ class NLTK:
                         finalidade = tag.palavra
                     else:
                         finalidade = finalidade + ' ' + tag.palavra 
-        
-        return finalidade
+                        
+                if tag.classe == Constantes.VERBO:
+                    verbo = True
+                elif tag.classe == Constantes.SUBSTANTIVO:
+                    substantivo = True
+                elif tag.classe == Constantes.PRONOME:
+                    pronome = True
+                elif tag.classe == Constantes.PREPOSICAO:
+                    preposicao = True
+        else:
+            return None
+                    
+        if verbo and substantivo and pronome and preposicao:        
+            return finalidade
+        else:
+            return Constantes.ERRO_FINALIDADE_INCONSISTENTE
     
     
     def separar_sentencas(texto):
@@ -252,3 +329,10 @@ class NLTK:
     def formatar_tempo(start, end):
         return round(end - start, 3).__str__().replace('.',',') + ' segundos'
             
+    def limpar_mensagem_de_erro(input):
+        if input == Constantes.ERRO_ATOR_INCONSISTENTE:
+            return None
+        elif input == Constantes.ERRO_ACAO_INCONSISTENTE:
+            return None
+        elif input == Constantes.ERRO_FINALIDADE_INCONSISTENTE:
+            return None
