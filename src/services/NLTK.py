@@ -7,10 +7,16 @@ from src.classes.Response import Response
 from src.classes.Palavra import Palavra
 from src.classes import Constantes
 
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nltk.download('averaged_perceptron_tagger')
+
 class NLTK:
     
     def processarHistoria(idioma:str, historia:str):
-        start = timeit.default_timer()  
+        start = timeit.default_timer()
+        response = None  
         
         bem_formada = NLTK.verifica_criterio_um(historia, idioma)
         atomica = NLTK.verifica_criterio_dois(historia, idioma)
@@ -18,16 +24,19 @@ class NLTK:
         ator = NLTK.retorna_ator(historia, idioma)    
         acao = NLTK.retorna_acao(historia, idioma)      
         finalidade = NLTK.retorna_finalidade(historia, idioma)  
-        erros = NLTK.verifica_erros(bem_formada, atomica, minima, ator, acao, finalidade)   
-        ator = NLTK.limpar_mensagem_de_erro(ator)
-        acao = NLTK.limpar_mensagem_de_erro(acao)   
-        finalidade = NLTK.limpar_mensagem_de_erro(finalidade)      
-        
+        erros = NLTK.verifica_erros(bem_formada, atomica, minima, ator, acao, finalidade)
         end = timeit.default_timer()  
-        
         tempo = NLTK.formatar_tempo(start, end)
+
+        if erros == None:
+            response = Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+        else:
+            ator = NLTK.limpar_mensagem_de_erro(ator)
+            acao = NLTK.limpar_mensagem_de_erro(acao)   
+            finalidade = NLTK.limpar_mensagem_de_erro(finalidade)
+            response = Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)      
         
-        return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+        return response
     
     def processarCenario(idioma:str, cenario:str):
         texto_processado = NLTK.processar(cenario, idioma)
@@ -172,25 +181,24 @@ class NLTK:
     
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Uma história é atômica quando há apenas um objetivo na tarefa
-    # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a partir da segunda sentença ela se enquadra no templete de ação
+    # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a segunda sentença possui menos que 3 verbos
     # Caso mais que uma sentença se enquadre no templete de ação, a história de usuário não será atômica
     def verifica_criterio_dois(texto, idioma):
         sentencas = NLTK.separar_sentencas(texto)
-        acoes_validas = 0
-        
-        if len(sentencas) < 2:
+        sentencas_tamanho = len(sentencas)
+        verbos = 0
+
+        if sentencas_tamanho < 2:
             return False
-        
-        x = 1 # 0 seria a sentença do ator
-        
-        for x in len(sentencas):
-            sentenca = sentencas[x]
-            acao = NLTK.retorna_acao(sentenca, idioma)
+
+        # Processa a sentença destinada a ação (2ª sentença)
+        tags = NLTK.processar(sentencas[1], idioma)
+
+        for tag in tags:
+            if tag.classe == Constantes.VERBO:
+                verbos = verbos + 1
             
-            if acao != Constantes.ERRO_ACAO_INCONSISTENTE:
-                acoes_validas = acoes_validas + 1
-            
-        return acoes_validas > 0 and acoes_validas < 2
+        return verbos < 3
     
     
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
@@ -233,9 +241,10 @@ class NLTK:
         
         substantivo = False
         pronome = False
+        preposicao = False
         
         for tag in tags:
-            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO:
+            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
                 if ator == '':
                     ator = tag.palavra
                 else:
@@ -245,8 +254,10 @@ class NLTK:
                 substantivo = True
             elif tag.classe == Constantes.PRONOME:
                 pronome = True
+            elif tag.classe == Constantes.PREPOSICAO:
+                preposicao = True
                     
-        if substantivo and pronome:
+        if substantivo and (pronome or preposicao):
             return ator
         else:
             return Constantes.ERRO_ATOR_INCONSISTENTE
@@ -256,7 +267,12 @@ class NLTK:
     def retorna_acao(texto, idioma):
         acao = ''
         sentencas = NLTK.separar_sentencas(texto)
-        sentenca = sentencas[1]
+        
+        if len(sentencas) >= 2:
+            sentenca = sentencas[1]
+        else:
+            return None
+
         tags = NLTK.processar(sentenca, idioma)
         
         verbo = False
@@ -296,7 +312,7 @@ class NLTK:
         pronome = False
         preposicao = False
         
-        if sentencas.__sizeof__() >= 3:
+        if len(sentencas) >= 3:
             sentenca = sentencas[2]
             tags = NLTK.processar(sentenca, idioma)
             for tag in tags:
@@ -317,7 +333,7 @@ class NLTK:
         else:
             return None
                     
-        if verbo and substantivo and pronome and preposicao:        
+        if (verbo and substantivo) and (pronome or preposicao):        
             return finalidade
         else:
             return Constantes.ERRO_FINALIDADE_INCONSISTENTE
