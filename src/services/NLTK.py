@@ -16,7 +16,6 @@ class NLTK:
     
     def processarHistoria(idioma:str, historia:str):
         start = timeit.default_timer()
-        response = None  
         
         bem_formada = NLTK.verifica_criterio_um(historia, idioma)
         atomica = NLTK.verifica_criterio_dois(historia, idioma)
@@ -29,18 +28,18 @@ class NLTK:
         tempo = NLTK.formatar_tempo(start, end)
 
         if erros == None:
-            response = Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+            return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
         else:
             ator = NLTK.limpar_mensagem_de_erro(ator)
             acao = NLTK.limpar_mensagem_de_erro(acao)   
             finalidade = NLTK.limpar_mensagem_de_erro(finalidade)
-            response = Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)      
+            return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)   
+           
         
-        return response
-    
     def processarCenario(idioma:str, cenario:str):
         texto_processado = NLTK.processar(cenario, idioma)
         return Response(cenario, Constantes.NLTK, 'TESTE', True, True, True, 'TESTE', 'TESTE', 'TESTE', None)
+    
     
     def tokenizar(sentenca:str, idioma:str):   
         tokens_sentencas = []
@@ -61,6 +60,7 @@ class NLTK:
         
         return tokens_palavras
     
+    
     # Lematização das palavras
     def lematizar(tokens_palavras):
         lemmas = []
@@ -69,6 +69,7 @@ class NLTK:
             lemma = wordnet_lemmatizer.lemmatize(token, pos='v')
             lemmas.append(lemma)
         return lemmas
+    
     
     # Tagging dos lemas das palavras
     def tagging(lemmas, idioma:str):
@@ -82,6 +83,7 @@ class NLTK:
             tags = ptbr_tagger_brill.tag(lemmas)
             
         return tags
+    
 
     # Fluxo de processamento de texto
     def processar(texto:str, idioma:str):
@@ -90,11 +92,13 @@ class NLTK:
         pre_tags = NLTK.tagging(lemas, idioma)
         return NLTK.unificar_tagset(pre_tags)
     
+    
     def unificar_tagset(tags):
         tagsets = []
         for tupla in tags:
             tagsets.append(Palavra(tupla[0], tupla[1], NLTK.get_classe_gramatical(tupla[1])))        
         return tagsets
+    
     
     # Função responsável em retornar a classe gramatical conforme o tagset
     def get_classe_gramatical(tagset):
@@ -129,29 +133,38 @@ class NLTK:
           else:
               return Constantes.INVALIDO
           
+          
     def verifica_pronome(tagset):
         return tagset == 'PROADJ' or tagset == 'PROSUB' or tagset == 'PROPESS' or tagset == 'PRON' or tagset == 'PRO-KS' or tagset == 'PRO-KS-REL' or tagset == 'PRP' or tagset == 'PRP$'
+    
     
     def verifica_adverbio(tagset):
         return tagset == 'ADV' or tagset == 'ADV-KS' or tagset == 'ADV-KS-REL' or tagset == 'RB' or tagset == 'RBS' or tagset == 'RBR'
     
+    
     def verifica_substantivo(tagset):
         return tagset == 'N' or tagset == 'NOUN' or tagset == 'NPROP' or tagset == 'NN' or tagset == 'NNP' or tagset == 'NNS'
+    
     
     def verifica_conjuncao(tagset):
         return tagset == 'KC' or tagset == 'KS' or tagset == 'CONJ' or tagset == 'CC' or tagset == 'IN'
     
+    
     def verifica_verbo(tagset):
         return tagset == 'V' or tagset == 'VERB' or tagset == 'VB' or tagset == 'VBD' or tagset == 'VBG' or tagset == 'VBN' or tagset == 'VBP' or tagset == 'VBG'or tagset == 'VBZ'
+    
     
     def verifica_adjetivo(tagset):
         return tagset == 'ADJ' or tagset == 'JJ' or tagset == 'JJR' or tagset == 'JJS'
     
+    
     def verifica_preposicao(tagset):
         return tagset == 'PREP' or tagset == 'PRP' or tagset == 'TO'
     
+    
     def verifica_artigo(tagset):
         return tagset == 'ART' or tagset == 'DET' or tagset == 'DT'
+    
     
     # Função responsável para verificar o primeiro critério de qualidade: Bem formada
     # Uma história é bem formada quando há o seguinte formato: Quem realizará a tarefa + objetivo da tarefa + finalidade para a realização da tarefa (opcional)
@@ -212,6 +225,7 @@ class NLTK:
         
         return False
     
+    
     def verifica_erros(bem_formada, atomica, minima, ator, acao, finalidade):
         erros = ''
         if not bem_formada:
@@ -230,6 +244,7 @@ class NLTK:
             return None
         
         return erros
+    
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # o ator deverá ser identificado na primeira sentença
@@ -242,9 +257,10 @@ class NLTK:
         substantivo = False
         pronome = False
         preposicao = False
+        artigo = False
         
         for tag in tags:
-            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
+            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
                 if ator == '':
                     ator = tag.palavra
                 else:
@@ -256,11 +272,14 @@ class NLTK:
                 pronome = True
             elif tag.classe == Constantes.PREPOSICAO:
                 preposicao = True
+            elif tag.classe == Constantes.ARTIGO:
+                artigo = True
                     
-        if substantivo and (pronome or preposicao):
+        if substantivo and (pronome or preposicao or artigo):
             return ator
         else:
             return Constantes.ERRO_ATOR_INCONSISTENTE
+        
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a ação deverá ser identificado na segunda sentença
@@ -300,6 +319,7 @@ class NLTK:
             return acao
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE
+        
     
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
@@ -333,7 +353,7 @@ class NLTK:
         else:
             return None
                     
-        if (verbo and substantivo) and (pronome or preposicao):        
+        if verbo and (pronome or preposicao or substantivo):        
             return finalidade
         else:
             return Constantes.ERRO_FINALIDADE_INCONSISTENTE
@@ -343,7 +363,7 @@ class NLTK:
         return texto.split(',')  
     
     def formatar_tempo(start, end):
-        return round(end - start, 3).__str__().replace('.',',') + ' segundos'
+        return round(end - start, 5).__str__().replace('.',',') + ' segundos'
             
     def limpar_mensagem_de_erro(input):
         if input == Constantes.ERRO_ATOR_INCONSISTENTE:
