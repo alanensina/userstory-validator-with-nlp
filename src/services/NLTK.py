@@ -39,16 +39,23 @@ class NLTK:
     def processarCenario(idioma:str, cenario:str):
         start = timeit.default_timer()
         
-        #bem_formada = NLTK.verifica_C1_cenario(cenario, idioma)
-        #atomica = NLTK.verifica_C2_cenario(historia, idioma)
-        #minima = NLTK.verifica_C3_cenario(historia, bem_formada)
+        bem_formada = NLTK.verifica_C1_cenario(cenario, idioma)
+        atomica = NLTK.verifica_C2_cenario(cenario, idioma)
+        minima = NLTK.verifica_C3_cenario(cenario, bem_formada)
         ator = NLTK.retorna_ator_cenario(cenario, idioma)    
         acao = NLTK.retorna_acao_cenario(cenario, idioma)      
         finalidade = NLTK.retorna_finalidade_cenario(cenario, idioma)
-        
+        erros = NLTK.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
         end = timeit.default_timer()  
         tempo = NLTK.formatar_tempo(start, end)
-        return Response(cenario, Constantes.NLTK, tempo, True, True, True, ator, acao, finalidade, None)
+
+        if erros == None:
+            return Response(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+        else:
+            ator = NLTK.limpar_mensagem_de_erro(ator)
+            acao = NLTK.limpar_mensagem_de_erro(acao)   
+            finalidade = NLTK.limpar_mensagem_de_erro(finalidade)
+            return Response(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
     
     
     def tokenizar(sentenca:str, idioma:str):   
@@ -192,9 +199,9 @@ class NLTK:
         if len(sentencas) < 2:
             return False
         
-        ator = NLTK.retorna_ator(texto, idioma)
-        acao = NLTK.retorna_acao(texto, idioma)
-        finalidade =  NLTK.retorna_finalidade(texto, idioma)
+        ator = NLTK.retorna_ator_historia(texto, idioma)
+        acao = NLTK.retorna_acao_historia(texto, idioma)
+        finalidade =  NLTK.retorna_finalidade_historia(texto, idioma)
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return True
@@ -204,14 +211,14 @@ class NLTK:
     def verifica_C1_cenario(texto, idioma):
         sentencas = NLTK.separar_sentencas(texto)
         
-        if len(sentencas) < 2:
+        if len(sentencas) < 3:
             return False
         
-        ator = NLTK.retorna_ator(texto, idioma)
-        acao = NLTK.retorna_acao(texto, idioma)
-        finalidade =  NLTK.retorna_finalidade(texto, idioma)
+        ator = NLTK.retorna_ator_cenario(texto, idioma)
+        acao = NLTK.retorna_acao_cenario(texto, idioma)
+        finalidade =  NLTK.retorna_finalidade_cenario(texto, idioma)
         
-        if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
+        if ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
             return True
         
         return False
@@ -220,7 +227,7 @@ class NLTK:
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Uma história é atômica quando há apenas um objetivo na tarefa
     # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a segunda sentença possui menos que 3 verbos
-    # Caso mais que uma sentença se enquadre no templete de ação, a história de usuário não será atômica
+    # Caso a sentença não se enquadre no templete de ação, a história de usuário não será atômica
     def verifica_C2_historia(texto, idioma):
         sentencas = NLTK.separar_sentencas(texto)
         sentencas_tamanho = len(sentencas)
@@ -237,6 +244,35 @@ class NLTK:
                 verbos = verbos + 1
             
         return verbos < 3
+
+    # Função responsável para verificar o segundo critério de qualidade: Atômica
+    # Um cenário é atômico quando há apenas um objetivo na tarefa
+    # Para validar se o cenário é atômico, as sentenças são separadas e em seguida é verificado a sentenção de ação (QUANDO/WHEN) possui menos que 3 verbos
+    # Caso a sentença não se enquadre no templete de ação, o cenário não será atômico
+    def verifica_C2_cenario(texto, idioma):
+        sentencas = NLTK.separar_sentencas(texto)
+        acoes = []
+
+        if len(sentencas) < 3:
+            return False
+
+        for s in sentencas:
+            if Constantes.QUANDO.lower() in s.lower() or Constantes.WHEN.lower() in s.lower():
+                acoes.append(s)
+
+        if len(acoes) > 1:
+            return False
+
+       # Processa a sentença destinada a ação
+        tags = NLTK.processar(acoes[0], idioma)
+
+        verbos = 0
+
+        for tag in tags:
+            if tag.classe == Constantes.VERBO:
+                verbos = verbos + 1 
+
+        return verbos < 3
     
     
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
@@ -249,6 +285,28 @@ class NLTK:
             return True
         
         return False
+
+
+    # Função responsável para verificar o terceiro critério de qualidade: Mínima
+    # Um cenário é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários e descrição esperada do comportamento deverá ser deixada de lado.
+    # É verificado quantas vezes o DADO/QUANDO/ENTÃO é chamado, caso tenha sido chamado mais que uma vez cada, o cenário não é mínimo
+    def verifica_C3_cenario(texto, bem_formada):
+        sentencas = NLTK.separar_sentencas(texto)
+        dado = 0
+        quando = 0
+        entao = 0
+
+        for s in sentencas:
+            if (Constantes.DADO.lower() in s.lower()) or (Constantes.GIVEN.lower() in s.lower()):
+                dado = dado + 1
+            elif (Constantes.QUANDO.lower() in s.lower()) or (Constantes.WHEN.lower() in s.lower()):
+                quando = quando + 1
+            elif (Constantes.ENTAO.lower() in s.lower()) or (Constantes.THEN.lower() in s.lower()):
+                entao = entao + 1
+
+        minima = dado == 1 and quando == 1 and entao == 1
+
+        return bem_formada and minima and len(sentencas) >= 3
     
     
     def verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade):
@@ -266,6 +324,30 @@ class NLTK:
         if finalidade == Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE + ' '
         if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
+            return None
+        
+        return erros
+
+    
+    def verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade):
+        erros = ''
+        if not bem_formada:
+            erros = 'O cenário não atende ao primeiro critério de qualidade que é Bem formada. '
+        if not atomica:
+            erros = erros + 'O cenário não atende ao segundo critério de qualidade que é Atômica. '
+        if not minima:
+            erros = erros + 'O cenário não atende ao terceiro critério de qualidade que é Mínima. '
+        if ator == Constantes.ERRO_ATOR_INCONSISTENTE_2:
+            erros = erros + Constantes.ERRO_ATOR_INCONSISTENTE_2 + ' '
+        if acao == Constantes.ERRO_ACAO_INCONSISTENTE_2:
+            erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE_2 + ' '
+        if acao == Constantes.ERRO_ACAO_INCONSISTENTE_3:
+            erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE_3 + ' '
+        if finalidade == Constantes.ERRO_FINALIDADE_INCONSISTENTE_2:
+            erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 + ' '
+        if finalidade == Constantes.ERRO_ACAO_INCONSISTENTE_3:
+            erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 + ' '
+        if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3 and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
             return None
         
         return erros
@@ -323,7 +405,7 @@ class NLTK:
             dado_given = True
             
         for tag in tags:
-            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
+            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
                 if ator == '':
                     ator = tag.palavra
                 else:
@@ -369,7 +451,7 @@ class NLTK:
                 else:
                     acao = acao + ' ' + tag.palavra
             
-            if tag.classe == Constantes.VERBO:
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
                 verbo = True
             elif tag.classe == Constantes.SUBSTANTIVO:
                 substantivo = True
@@ -421,13 +503,13 @@ class NLTK:
         preposicao = False
         
         for tag in tags:
-            if tag.classe == Constantes.VERBO or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
                 if acao == '':
                     acao = tag.palavra
                 else:
                     acao = acao + ' ' + tag.palavra
             
-            if tag.classe == Constantes.VERBO:
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
                 verbo = True
             elif tag.classe == Constantes.SUBSTANTIVO:
                 substantivo = True
@@ -463,7 +545,7 @@ class NLTK:
                     else:
                         finalidade = finalidade + ' ' + tag.palavra 
                         
-                if tag.classe == Constantes.VERBO:
+                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
                     verbo = True
                 elif tag.classe == Constantes.SUBSTANTIVO:
                     substantivo = True
@@ -522,13 +604,13 @@ class NLTK:
         tags = NLTK.processar(sentenca, idioma)
         
         for tag in tags:
-                if tag.classe == Constantes.VERBO or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ADVERBIO:
+                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ADVERBIO or tag.classe == Constantes.PARTICIPIO or tag.classe == Constantes.ADJETIVO or tag.classe == Constantes.ARTIGO:
                     if finalidade == '':
                         finalidade = tag.palavra
                     else:
                         finalidade = finalidade + ' ' + tag.palavra 
                         
-                if tag.classe == Constantes.VERBO:
+                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
                     verbo = True
                 elif tag.classe == Constantes.SUBSTANTIVO:
                     substantivo = True
@@ -556,9 +638,17 @@ class NLTK:
     def limpar_mensagem_de_erro(input):
         if input == Constantes.ERRO_ATOR_INCONSISTENTE:
             return None
+        if input == Constantes.ERRO_ATOR_INCONSISTENTE_2:
+            return None
         elif input == Constantes.ERRO_ACAO_INCONSISTENTE:
             return None
+        elif input == Constantes.ERRO_ACAO_INCONSISTENTE_2:
+            return None
+        elif input == Constantes.ERRO_ACAO_INCONSISTENTE_3:
+            return None
         elif input == Constantes.ERRO_FINALIDADE_INCONSISTENTE:
+            return None
+        elif input == Constantes.ERRO_FINALIDADE_INCONSISTENTE_2:
             return None
         
         

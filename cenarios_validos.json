@@ -1,0 +1,6 @@
+[
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que o cliente deseja abrir uma conta, e informou o CPF, e informou o RG, e informou o endereço, quando entrar com essas informações no cadastro, então uma nova conta deve ser criada."
+    }
+]
