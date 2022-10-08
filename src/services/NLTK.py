@@ -152,11 +152,11 @@ class NLTK:
           
           
     def verifica_pronome(tagset):
-        return tagset == 'PROADJ' or tagset == 'PROSUB' or tagset == 'PROPESS' or tagset == 'PRON' or tagset == 'PRO-KS' or tagset == 'PRO-KS-REL' or tagset == 'PRP' or tagset == 'PRP$'
+        return tagset == 'PROADJ' or tagset == 'PROSUB' or tagset == 'PROPESS' or tagset == 'PRON' or tagset == 'PRO-KS' or tagset == 'PRO-KS-REL' or tagset == 'PRP' or tagset == 'PRP$' or tagset == 'WP'
     
     
     def verifica_adverbio(tagset):
-        return tagset == 'ADV' or tagset == 'ADV-KS' or tagset == 'ADV-KS-REL' or tagset == 'RB' or tagset == 'RBS' or tagset == 'RBR'
+        return tagset == 'ADV' or tagset == 'ADV-KS' or tagset == 'ADV-KS-REL' or tagset == 'RB' or tagset == 'RBS' or tagset == 'RBR' or tagset == 'WRB'
     
     
     def verifica_substantivo(tagset):
@@ -180,7 +180,7 @@ class NLTK:
     
     
     def verifica_artigo(tagset):
-        return tagset == 'ART' or tagset == 'DET' or tagset == 'DT'
+        return tagset == 'ART' or tagset == 'DET' or tagset == 'DT' or tagset == 'WDT'
     
     
     # Função responsável para verificar o primeiro critério de qualidade: Bem formada
@@ -501,9 +501,10 @@ class NLTK:
         substantivo = False
         pronome = False
         preposicao = False
+        adverbio = False
         
         for tag in tags:
-            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.ADVERBIO:
                 if acao == '':
                     acao = tag.palavra
                 else:
@@ -517,8 +518,10 @@ class NLTK:
                 pronome = True
             elif tag.classe == Constantes.PREPOSICAO:
                 preposicao = True
+            elif tag.classe == Constantes.ADVERBIO:
+                adverbio = True
             
-        if verbo and substantivo and pronome and preposicao and ator_antes_da_acao:        
+        if verbo and substantivo and (pronome or preposicao or adverbio) and ator_antes_da_acao:        
             return acao
         
         return Constantes.ERRO_ACAO_INCONSISTENTE_2

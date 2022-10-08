@@ -2,5 +2,25 @@
     {
         "idioma": "ptbr",
         "cenario": "Dado que o cliente deseja abrir uma conta, e informou o CPF, e informou o RG, e informou o endereço, quando entrar com essas informações no cadastro, então uma nova conta deve ser criada."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que o usuário deseja listar seus pedidos, e ele esteja logado, quando ele clicar no botão listar pedidos, então uma lista de pedidos deverá ser exibida."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que o comprador deseja realizar uma compra, e adicionou os itens ao pedido, quando ele clicar no botão comprar, então um novo pedido deverá ser criado."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given a customer wants to open an account, and the ID was informed, and the address was informed, when all those information was typed, then a new account must be created."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given that the user wants to list his orders, and he is logged, when he clicks the list orders button, then a list of orders should be displayed."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given that the buyer wants to make a new order, and has added all items to the order, when he clicks on the buy button, then a new order must be created."
     }
 ]

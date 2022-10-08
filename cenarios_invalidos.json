@@ -1,26 +1,26 @@
 [
   {
-    "idioma": "ptbr",
-    "historia": "Como vendedor, quero de cadastrar"
+      "idioma": "ptbr",
+      "cenario": "Dado que o cliente deseja abrir uma conta, então uma nova conta deve ser criada."
   },
   {
-    "idioma": "en",
-    "historia": "As a seller, I want register"
+      "idioma": "ptbr",
+      "cenario": "Dado que o usuário deseja listar seus pedidos, e ele esteja logado, quando ele clicar no botão listar pedidos e selecionar um período de listagem, então uma lista de pedidos deverá ser exibida."
   },
   {
-    "idioma": "ptbr",
-    "historia": "Eu como vendedor, gostaria de cadastrar meus produtos e listar na mesma tela."
+      "idioma": "ptbr",
+      "cenario": "Dado que o comprador deseja realizar uma compra, quando ele clicar no botão comprar, e quando ele selecionar um período, então um novo pedido deverá ser criado."
   },
   {
-    "idioma": "en",
-    "historia": "As a seller, I would like to register my products and list them on the same screen."
+      "idioma": "en",
+      "cenario": "Given a customer wants to open an account, then a new account must be created."
   },
   {
-    "idioma": "ptbr",
-    "historia": "Eu como advogado, gostaria de listar meus processos, para que eu possa verificar quais estão em andamento, quais estão finalizados e quais não foram iniciados."
+      "idioma": "en",
+      "cenario": "Given that the user wants to list his orders, and he is logged, when he clicks the list orders button and select a period to list, then a list of orders should be displayed."
   },
   {
-    "idioma": "en",
-    "historia": "As a lawyer, I would like to list my processes, so that I can check which ones are in progress, which ones are finalized and which one have not started."
+      "idioma": "en",
+      "cenario": "Given that the buyer wants to make a new order, and has added all items to the order, when he clicks on the buy button, and when he select a period, then a new order must be created."
   }
 ]
