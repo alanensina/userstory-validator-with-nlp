@@ -443,9 +443,10 @@ class NLTK:
         substantivo = False
         pronome = False
         preposicao = False
+        adverbio = False
         
         for tag in tags:
-            if tag.classe == Constantes.VERBO or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.ADVERBIO:
                 if acao == '':
                     acao = tag.palavra
                 else:
@@ -459,8 +460,10 @@ class NLTK:
                 pronome = True
             elif tag.classe == Constantes.PREPOSICAO:
                 preposicao = True
+            elif tag.classe == Constantes.ADVERBIO:
+                adverbio = True
             
-        if verbo and substantivo and pronome and preposicao:        
+        if verbo and substantivo and pronome and (preposicao or adverbio):        
             return acao
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE
@@ -537,12 +540,13 @@ class NLTK:
         substantivo = False
         pronome = False
         preposicao = False
+        adverbio = False
         
         if len(sentencas) >= 3:
             sentenca = sentencas[2]
             tags = NLTK.processar(sentenca, idioma)
             for tag in tags:
-                if tag.classe == Constantes.VERBO or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
+                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ADVERBIO or tag.classe == Constantes.PARTICIPIO or tag.classe == Constantes.ADJETIVO or tag.classe == Constantes.ARTIGO:
                     if finalidade == '':
                         finalidade = tag.palavra
                     else:
@@ -556,11 +560,14 @@ class NLTK:
                     pronome = True
                 elif tag.classe == Constantes.PREPOSICAO:
                     preposicao = True
+                elif tag.classe == Constantes.ADVERBIO:
+                    adverbio = True
         else:
             return None
                     
-        if verbo and (pronome or preposicao or substantivo):        
+        if verbo and (pronome or preposicao or substantivo or adverbio):        
             return finalidade
+
         else:
             return Constantes.ERRO_FINALIDADE_INCONSISTENTE
     
