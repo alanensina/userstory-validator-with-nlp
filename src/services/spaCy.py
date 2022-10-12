@@ -27,8 +27,25 @@ class SPACY:
 
     
     def processarCenario(idioma:str, cenario:str):
-        SPACY.processar(cenario, idioma)
-        return Response(cenario, 'spaCy', 'TESTE', True, True, True, 'TESTE', 'TESTE', 'TESTE', None)
+        start = timeit.default_timer()
+        
+        bem_formada = SPACY.verifica_C1_cenario(cenario, idioma)
+        atomica = SPACY.verifica_C2_cenario(cenario, idioma)
+        minima = utils.verifica_C3_cenario(cenario, bem_formada)
+        ator = SPACY.retorna_ator_cenario(cenario, idioma)    
+        acao = SPACY.retorna_acao_cenario(cenario, idioma)      
+        finalidade = SPACY.retorna_finalidade_cenario(cenario, idioma)
+        erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
+        end = timeit.default_timer()  
+        tempo = utils.formatar_tempo(start, end)
+
+        if erros == None:
+            return Response(cenario, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+        else:
+            ator = utils.limpar_mensagem_de_erro(ator)
+            acao = utils.limpar_mensagem_de_erro(acao)   
+            finalidade = utils.limpar_mensagem_de_erro(finalidade)
+            return Response(cenario, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)    
 
 
     def processar(texto, idioma):
@@ -55,6 +72,15 @@ class SPACY:
         return utils.valida_ator_historia(tags)
 
     
+    # Conforme o layout de cenário (Dado/Quando/Então), o ator deverá ser identificado na primeira sentença
+    # A palavra Dado/Given também deve estar presente
+    def retorna_ator_cenario(texto, idioma):
+        sentencas = utils.separar_sentencas(texto)
+        sentenca = sentencas[0]
+        tags = SPACY.processar(sentenca, idioma)
+        return utils.valida_ator_cenario(tags, sentenca)
+
+    
      # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a ação deverá ser identificado na segunda sentença
     def retorna_acao_historia(texto, idioma):
@@ -70,6 +96,67 @@ class SPACY:
         return utils.valida_acao_historia(tags)
 
 
+    # Conforme o layout de cenário (Dado/Quando/Então), a ação deverá ser identificada em uma sentença posterior a sentença do ator
+    # A palavra Quando/When também deve estar presente nessa sentença
+    def retorna_acao_cenario(texto, idioma):
+        acao = ''
+        sentencas = utils.separar_sentencas(texto)
+        posicao_ator = 0
+        ator_encontrado = False
+        posicao_acao = 0
+        acao_encontrada = False
+        
+        for sentenca in sentencas:
+            if (Constantes.DADO.lower() in sentenca.lower() or Constantes.GIVEN.lower() in sentenca.lower()) and not ator_encontrado:
+                ator_encontrado = True
+                posicao_ator = sentencas.index(sentenca)
+            elif (Constantes.QUANDO.lower() in sentenca.lower() or Constantes.WHEN.lower() in sentenca.lower()) and not acao_encontrada:
+                acao_encontrada = True
+                posicao_acao = sentencas.index(sentenca)
+            elif utils.verifica_ator_e_acao_e_finalidade_ja_encontrados(sentenca, ator_encontrado, acao_encontrada, False):
+                return Constantes.ERRO_ACAO_INCONSISTENTE_3
+
+        ator_antes_da_acao = posicao_ator < posicao_acao
+        
+        sentenca = ''
+        
+        if posicao_acao > 0 :
+            sentenca = sentencas[posicao_acao]
+        else:
+            return Constantes.ERRO_ACAO_INCONSISTENTE_2
+        
+        tags = SPACY.processar(sentenca, idioma)
+        
+        verbo = False
+        substantivo = False
+        pronome = False
+        preposicao = False
+        adverbio = False
+        
+        for tag in tags:
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.ADVERBIO:
+                if acao == '':
+                    acao = tag.palavra
+                else:
+                    acao = acao + ' ' + tag.palavra
+            
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
+                verbo = True
+            elif tag.classe == Constantes.SUBSTANTIVO:
+                substantivo = True
+            elif tag.classe == Constantes.PRONOME:
+                pronome = True
+            elif tag.classe == Constantes.PREPOSICAO:
+                preposicao = True
+            elif tag.classe == Constantes.ADVERBIO:
+                adverbio = True
+            
+        if verbo and substantivo and (pronome or preposicao or adverbio) and ator_antes_da_acao:        
+            return acao
+        
+        return Constantes.ERRO_ACAO_INCONSISTENTE_2
+
+
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
     def retorna_finalidade_historia(texto, idioma):
@@ -80,6 +167,71 @@ class SPACY:
             tags = SPACY.processar(sentenca, idioma)
             return utils.valida_finalidade_historia(tags)
         return None
+
+    
+    # Conforme o layout de cenário (Dado/Quando/Então), a finalidade deverá ser identificada em uma sentença posterior a sentença do ator e da ação
+    # A palavra Então/Then também deve estar presente nessa sentença
+    def retorna_finalidade_cenario(texto, idioma):
+        finalidade = ''
+        sentencas = utils.separar_sentencas(texto)
+        posicao_ator = 0
+        ator_encontrado = False
+        posicao_acao = 0
+        acao_encontrada = False
+        posicao_finalidade = 0
+        finalidade_encontrada = False
+        
+        for sentenca in sentencas:
+            if (Constantes.DADO.lower() in sentenca.lower() or Constantes.GIVEN.lower() in sentenca.lower()) and not ator_encontrado:
+                ator_encontrado = True
+                posicao_ator = sentencas.index(sentenca)
+            elif (Constantes.QUANDO.lower() in sentenca.lower() or Constantes.WHEN.lower() in sentenca.lower()) and not acao_encontrada:
+                acao_encontrada = True
+                posicao_acao = sentencas.index(sentenca)
+            elif (Constantes.ENTAO.lower() in sentenca.lower() or Constantes.THEN.lower() in sentenca.lower()) and not finalidade_encontrada:
+                finalidade_encontrada = True
+                posicao_finalidade = sentencas.index(sentenca)
+            elif utils.verifica_ator_e_acao_e_finalidade_ja_encontrados(sentenca, ator_encontrado, acao_encontrada, finalidade_encontrada):
+                return Constantes.ERRO_ACAO_INCONSISTENTE_3
+            
+        ordem_correta = posicao_ator < posicao_acao and posicao_acao < posicao_finalidade
+        verbo = False
+        substantivo = False
+        pronome = False
+        preposicao = False
+        adverbio = False
+        
+        sentenca = ''
+        
+        if posicao_finalidade > 0 :
+            sentenca = sentencas[posicao_finalidade]
+        else:
+            return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2
+        
+        tags = SPACY.processar(sentenca, idioma)
+        
+        for tag in tags:
+                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ADVERBIO or tag.classe == Constantes.PARTICIPIO or tag.classe == Constantes.ADJETIVO or tag.classe == Constantes.ARTIGO:
+                    if finalidade == '':
+                        finalidade = tag.palavra
+                    else:
+                        finalidade = finalidade + ' ' + tag.palavra 
+                        
+                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
+                    verbo = True
+                elif tag.classe == Constantes.SUBSTANTIVO:
+                    substantivo = True
+                elif tag.classe == Constantes.PRONOME:
+                    pronome = True
+                elif tag.classe == Constantes.PREPOSICAO:
+                    preposicao = True
+                elif tag.classe == Constantes.ADVERBIO:
+                    adverbio = True
+                    
+        if verbo and (pronome or preposicao or substantivo or adverbio) and ordem_correta:        
+            return finalidade
+        
+        return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2
 
     
     # Função responsável para verificar o primeiro critério de qualidade: Bem formada
@@ -107,6 +259,22 @@ class SPACY:
         
         return False
 
+
+    def verifica_C1_cenario(texto, idioma):
+        sentencas = utils.separar_sentencas(texto)
+        
+        if len(sentencas) < 3:
+            return False
+        
+        ator = SPACY.retorna_ator_cenario(texto, idioma)
+        acao = SPACY.retorna_acao_cenario(texto, idioma)
+        finalidade =  SPACY.retorna_finalidade_cenario(texto, idioma)
+        
+        if ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
+            return True
+        
+        return False
+
     
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Uma história é atômica quando há apenas um objetivo na tarefa
@@ -124,7 +292,38 @@ class SPACY:
         tags = SPACY.processar(sentencas[1], idioma)
 
         for tag in tags:
-            if tag.classe == Constantes.VERBO:
+            if tag.classe == Constantes.VERBO and tag.palavra != 'would':
                 verbos = verbos + 1
             
-        return (verbos < 3 and idioma == Constantes.PTBR) or (verbos <= 3 and idioma == Constantes.EN)
+        return verbos < 3
+
+
+    # Função responsável para verificar o segundo critério de qualidade: Atômica
+    # Um cenário é atômico quando há apenas um objetivo na tarefa
+    # Para validar se o cenário é atômico, as sentenças são separadas e em seguida é verificado a sentenção de ação (QUANDO/WHEN) possui menos que 3 verbos
+    # Caso a sentença não se enquadre no templete de ação, o cenário não será atômico
+    def verifica_C2_cenario(texto, idioma):
+        sentencas = utils.separar_sentencas(texto)
+        acoes = []
+
+        if len(sentencas) < 3:
+            return False
+
+        for s in sentencas:
+            if Constantes.QUANDO.lower() in s.lower() or Constantes.WHEN.lower() in s.lower():
+                acoes.append(s)
+
+        if len(acoes) > 1:
+            return False
+
+       # Processa a sentença destinada a ação
+        tags = SPACY.processar(acoes[0], idioma)
+
+        verbos = 0
+
+        for tag in tags:
+            if tag.classe == Constantes.VERBO and tag.palavra != 'would':
+                verbos = verbos + 1 
+
+        return verbos < 3
+    

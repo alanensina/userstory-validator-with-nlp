@@ -1,5 +1,3 @@
-from pydoc import Doc
-from typing import Any
 from src.classes import Constantes
 from src.classes.Palavra import Palavra
 
@@ -326,6 +324,28 @@ class Utils():
             return True
         
         return False
+
+    
+    # Função responsável para verificar o terceiro critério de qualidade: Mínima
+    # Um cenário é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários e descrição esperada do comportamento deverá ser deixada de lado.
+    # É verificado quantas vezes o DADO/QUANDO/ENTÃO é chamado, caso tenha sido chamado mais que uma vez cada, o cenário não é mínimo
+    def verifica_C3_cenario(self, texto, bem_formada):
+        sentencas = utils.separar_sentencas(texto)
+        dado = 0
+        quando = 0
+        entao = 0
+
+        for s in sentencas:
+            if (Constantes.DADO.lower() in s.lower()) or (Constantes.GIVEN.lower() in s.lower()):
+                dado = dado + 1
+            elif (Constantes.QUANDO.lower() in s.lower()) or (Constantes.WHEN.lower() in s.lower()):
+                quando = quando + 1
+            elif (Constantes.ENTAO.lower() in s.lower()) or (Constantes.THEN.lower() in s.lower()):
+                entao = entao + 1
+
+        minima = dado == 1 and quando == 1 and entao == 1
+
+        return bem_formada and minima and len(sentencas) >= 3 
 
 
 utils = Utils()

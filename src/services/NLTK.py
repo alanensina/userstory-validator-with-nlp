@@ -40,7 +40,7 @@ class NLTK:
         
         bem_formada = NLTK.verifica_C1_cenario(cenario, idioma)
         atomica = NLTK.verifica_C2_cenario(cenario, idioma)
-        minima = NLTK.verifica_C3_cenario(cenario, bem_formada)
+        minima = utils.verifica_C3_cenario(cenario, bem_formada)
         ator = NLTK.retorna_ator_cenario(cenario, idioma)    
         acao = NLTK.retorna_acao_cenario(cenario, idioma)      
         finalidade = NLTK.retorna_finalidade_cenario(cenario, idioma)
@@ -134,6 +134,7 @@ class NLTK:
         
         return False
     
+
     def verifica_C1_cenario(texto, idioma):
         sentencas = utils.separar_sentencas(texto)
         
@@ -166,10 +167,10 @@ class NLTK:
         tags = NLTK.processar(sentencas[1], idioma)
 
         for tag in tags:
-            if tag.classe == Constantes.VERBO:
+            if tag.classe == Constantes.VERBO and tag.palavra != 'would':
                 verbos = verbos + 1
             
-        return (verbos < 3 and idioma == Constantes.PTBR) or (verbos <= 3 and idioma == Constantes.EN)
+        return verbos < 3
 
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Um cenário é atômico quando há apenas um objetivo na tarefa
@@ -195,31 +196,10 @@ class NLTK:
         verbos = 0
 
         for tag in tags:
-            if tag.classe == Constantes.VERBO:
+            if tag.classe == Constantes.VERBO and tag.palavra != 'would':
                 verbos = verbos + 1 
 
         return verbos < 3
-
-    # Função responsável para verificar o terceiro critério de qualidade: Mínima
-    # Um cenário é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários e descrição esperada do comportamento deverá ser deixada de lado.
-    # É verificado quantas vezes o DADO/QUANDO/ENTÃO é chamado, caso tenha sido chamado mais que uma vez cada, o cenário não é mínimo
-    def verifica_C3_cenario(texto, bem_formada):
-        sentencas = utils.separar_sentencas(texto)
-        dado = 0
-        quando = 0
-        entao = 0
-
-        for s in sentencas:
-            if (Constantes.DADO.lower() in s.lower()) or (Constantes.GIVEN.lower() in s.lower()):
-                dado = dado + 1
-            elif (Constantes.QUANDO.lower() in s.lower()) or (Constantes.WHEN.lower() in s.lower()):
-                quando = quando + 1
-            elif (Constantes.ENTAO.lower() in s.lower()) or (Constantes.THEN.lower() in s.lower()):
-                entao = entao + 1
-
-        minima = dado == 1 and quando == 1 and entao == 1
-
-        return bem_formada and minima and len(sentencas) >= 3  
     
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
