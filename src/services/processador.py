@@ -18,12 +18,12 @@ class Processador():
             
             if type == 'historia':
                 historia = p.get('historia')
-                #response.append(NLTK.processarHistoria(idioma, historia))
+                response.append(NLTK.processarHistoria(idioma, historia))
                 response.append(SPACY.processarHistoria(idioma, historia))
             elif type == 'cenario':
                 cenario = p.get('cenario')
-                #response.append(NLTK.processarCenario(idioma, cenario))
-                response.append(SPACY.processarCenario(idioma, cenario))
+                response.append(NLTK.processarCenario(idioma, cenario))
+                #response.append(SPACY.processarCenario(idioma, cenario))
             else:
                 return Response(None, None, None, False, False, False, None, None, None, 'Tipo inválido')
                 

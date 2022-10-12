@@ -6,6 +6,7 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from src.classes.Response import Response
 from src.classes.Palavra import Palavra
 from src.classes import Constantes
+from src.services.Utils import utils
 
 nltk.download('punkt')
 nltk.download('wordnet')
@@ -23,16 +24,16 @@ class NLTK:
         ator = NLTK.retorna_ator_historia(historia, idioma)    
         acao = NLTK.retorna_acao_historia(historia, idioma)      
         finalidade = NLTK.retorna_finalidade_historia(historia, idioma)  
-        erros = NLTK.verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade)
+        erros = utils.verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade)
         end = timeit.default_timer()  
-        tempo = NLTK.formatar_tempo(start, end)
+        tempo = utils.formatar_tempo(start, end)
 
         if erros == None:
             return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
         else:
-            ator = NLTK.limpar_mensagem_de_erro(ator)
-            acao = NLTK.limpar_mensagem_de_erro(acao)   
-            finalidade = NLTK.limpar_mensagem_de_erro(finalidade)
+            ator = utils.limpar_mensagem_de_erro(ator)
+            acao = utils.limpar_mensagem_de_erro(acao)   
+            finalidade = utils.limpar_mensagem_de_erro(finalidade)
             return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)   
            
         
@@ -45,16 +46,16 @@ class NLTK:
         ator = NLTK.retorna_ator_cenario(cenario, idioma)    
         acao = NLTK.retorna_acao_cenario(cenario, idioma)      
         finalidade = NLTK.retorna_finalidade_cenario(cenario, idioma)
-        erros = NLTK.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
+        erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
         end = timeit.default_timer()  
-        tempo = NLTK.formatar_tempo(start, end)
+        tempo = utils.formatar_tempo(start, end)
 
         if erros == None:
             return Response(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
         else:
-            ator = NLTK.limpar_mensagem_de_erro(ator)
-            acao = NLTK.limpar_mensagem_de_erro(acao)   
-            finalidade = NLTK.limpar_mensagem_de_erro(finalidade)
+            ator = utils.limpar_mensagem_de_erro(ator)
+            acao = utils.limpar_mensagem_de_erro(acao)   
+            finalidade = utils.limpar_mensagem_de_erro(finalidade)
             return Response(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
     
     
@@ -102,109 +103,12 @@ class NLTK:
         return tags
     
 
-    # Fluxo de processamento de texto
+    # Fluxo de processamento de texto no NLTK
     def processar(texto:str, idioma:str):
         tokens_palavras = NLTK.tokenizar(texto, idioma)
         lemas = NLTK.lematizar(tokens_palavras)
         pre_tags = NLTK.tagging(lemas, idioma)
-        return NLTK.unificar_tagset(pre_tags)
-    
-    
-    def unificar_tagset(tags):
-        tagsets = []
-        for tupla in tags:
-            tagsets.append(Palavra(tupla[0], tupla[1], NLTK.get_classe_gramatical(tupla[1])))        
-        return tagsets
-    
-    
-    # Função responsável em retornar a classe gramatical conforme o tagset
-    def get_classe_gramatical(tagset):
-          if NLTK.verifica_artigo(tagset):
-              return Constantes.ARTIGO
-          elif NLTK.verifica_adjetivo(tagset):
-              return Constantes.ADJETIVO
-          elif NLTK.verifica_substantivo(tagset):
-              return Constantes.SUBSTANTIVO
-          elif NLTK.verifica_numeral(tagset):
-              return Constantes.NUMERAL
-          elif NLTK.verifica_pronome(tagset):
-              return Constantes.PRONOME
-          elif NLTK.verifica_adverbio(tagset):
-              return Constantes.ADVERBIO
-          elif NLTK.verifica_conjuncao(tagset):
-              return Constantes.CONJUNCAO
-          elif NLTK.verifica_preposicao(tagset):
-              return Constantes.PREPOSICAO
-          elif NLTK.verifica_interjeicao(tagset):
-              return Constantes.INTERJEICAO
-          elif NLTK.verifica_verbo(tagset):
-              return Constantes.VERBO
-          elif NLTK.verifica_verbo_aux(tagset):
-              return Constantes.VERBO_AUX
-          elif NLTK.verifica_participio(tagset):
-              return Constantes.PARTICIPIO
-          elif NLTK.verifica_denotativo(tagset):
-              return Constantes.PALAVRA_DEN
-          elif NLTK.verifica_moeda(tagset):
-              return Constantes.MOEDA        
-          else:
-              return Constantes.INVALIDO
-          
-          
-    def verifica_pronome(tagset):
-        return tagset == 'PROADJ' or tagset == 'PROSUB' or tagset == 'PROPESS' or tagset == 'PRON' or tagset == 'PRO-KS' or tagset == 'PRO-KS-REL' or tagset == 'PRP' or tagset == 'PRP$' or tagset == 'WP'
-    
-
-    def verifica_numeral(tagset):
-        return tagset == 'NUM' or tagset == 'CD'
-
-
-    def verifica_verbo_aux(tagset):
-        return tagset == 'VAUX' or tagset == 'AUX'
-
-
-    def verifica_denotativo(tagset):
-        return tagset == 'PDEN'
-
-
-    def verifica_moeda(tagset):
-        return tagset == 'CUR'
-
-
-    def verifica_participio(tagset):
-        return tagset == 'PCP' or tagset == 'RP'
-
-
-    def verifica_interjeicao(tagset):
-        return tagset == 'IN' or tagset == 'UH'
-        
-    
-    def verifica_adverbio(tagset):
-        return tagset == 'ADV' or tagset == 'ADV-KS' or tagset == 'ADV-KS-REL' or tagset == 'RB' or tagset == 'RBS' or tagset == 'RBR' or tagset == 'WRB'
-    
-    
-    def verifica_substantivo(tagset):
-        return tagset == 'N' or tagset == 'NOUN' or tagset == 'NPROP' or tagset == 'NN' or tagset == 'NNP' or tagset == 'NNS'
-    
-    
-    def verifica_conjuncao(tagset):
-        return tagset == 'KC' or tagset == 'KS' or tagset == 'CONJ' or tagset == 'CC' or tagset == 'IN' or tagset == 'SCONJ'
-    
-    
-    def verifica_verbo(tagset):
-        return tagset == 'V' or tagset == 'VERB' or tagset == 'VB' or tagset == 'VBD' or tagset == 'VBG' or tagset == 'VBN' or tagset == 'VBP' or tagset == 'VBG'or tagset == 'VBZ' or tagset == 'MD'
-    
-    
-    def verifica_adjetivo(tagset):
-        return tagset == 'ADJ' or tagset == 'JJ' or tagset == 'JJR' or tagset == 'JJS'
-    
-    
-    def verifica_preposicao(tagset):
-        return tagset == 'PREP' or tagset == 'PRP' or tagset == 'TO' or tagset == 'ADP'
-    
-    
-    def verifica_artigo(tagset):
-        return tagset == 'ART' or tagset == 'DET' or tagset == 'DT' or tagset == 'WDT'
+        return utils.unificar_tagset(pre_tags, Constantes.NLTK)
     
     
     # Função responsável para verificar o primeiro critério de qualidade: Bem formada
@@ -218,7 +122,7 @@ class NLTK:
     # Objeto indireto (opcional) -> Substantivo ou pronome
     # Objeto direto -> Substantivo ou pronome
     def verifica_C1_historia(texto, idioma):
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         
         if len(sentencas) < 2:
             return False
@@ -233,7 +137,7 @@ class NLTK:
         return False
     
     def verifica_C1_cenario(texto, idioma):
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         
         if len(sentencas) < 3:
             return False
@@ -253,7 +157,7 @@ class NLTK:
     # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a segunda sentença possui menos que 3 verbos
     # Caso a sentença não se enquadre no templete de ação, a história de usuário não será atômica
     def verifica_C2_historia(texto, idioma):
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         sentencas_tamanho = len(sentencas)
         verbos = 0
 
@@ -274,7 +178,7 @@ class NLTK:
     # Para validar se o cenário é atômico, as sentenças são separadas e em seguida é verificado a sentenção de ação (QUANDO/WHEN) possui menos que 3 verbos
     # Caso a sentença não se enquadre no templete de ação, o cenário não será atômico
     def verifica_C2_cenario(texto, idioma):
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         acoes = []
 
         if len(sentencas) < 3:
@@ -303,7 +207,7 @@ class NLTK:
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
     # e descrição esperada do comportamento deverá ser deixada de lado.
     def verifica_C3_historia(texto, bem_formada):
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         
         if bem_formada and len(sentencas) <= 3:
             return True
@@ -315,7 +219,7 @@ class NLTK:
     # Um cenário é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários e descrição esperada do comportamento deverá ser deixada de lado.
     # É verificado quantas vezes o DADO/QUANDO/ENTÃO é chamado, caso tenha sido chamado mais que uma vez cada, o cenário não é mínimo
     def verifica_C3_cenario(texto, bem_formada):
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         dado = 0
         quando = 0
         entao = 0
@@ -330,58 +234,14 @@ class NLTK:
 
         minima = dado == 1 and quando == 1 and entao == 1
 
-        return bem_formada and minima and len(sentencas) >= 3
-    
-    
-    def verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade):
-        erros = ''
-        if not bem_formada:
-            erros = 'A história não atende o primeiro critério de qualidade que é Bem formada. '
-        if not atomica:
-            erros = erros + 'A história não atende o segundo critério de qualidade que é Atômica. '
-        if not minima:
-            erros = erros + 'A história não atende o terceiro critério de qualidade que é Mínima. '
-        if ator == Constantes.ERRO_ATOR_INCONSISTENTE:
-            erros = erros + Constantes.ERRO_ATOR_INCONSISTENTE + ' '
-        if acao == Constantes.ERRO_ACAO_INCONSISTENTE:
-            erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE + ' '
-        if finalidade == Constantes.ERRO_FINALIDADE_INCONSISTENTE:
-            erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE + ' '
-        if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
-            return None
-        
-        return erros
-
-    
-    def verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade):
-        erros = ''
-        if not bem_formada:
-            erros = 'O cenário não atende ao primeiro critério de qualidade que é Bem formada. '
-        if not atomica:
-            erros = erros + 'O cenário não atende ao segundo critério de qualidade que é Atômica. '
-        if not minima:
-            erros = erros + 'O cenário não atende ao terceiro critério de qualidade que é Mínima. '
-        if ator == Constantes.ERRO_ATOR_INCONSISTENTE_2:
-            erros = erros + Constantes.ERRO_ATOR_INCONSISTENTE_2 + ' '
-        if acao == Constantes.ERRO_ACAO_INCONSISTENTE_2:
-            erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE_2 + ' '
-        if acao == Constantes.ERRO_ACAO_INCONSISTENTE_3:
-            erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE_3 + ' '
-        if finalidade == Constantes.ERRO_FINALIDADE_INCONSISTENTE_2:
-            erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 + ' '
-        if finalidade == Constantes.ERRO_ACAO_INCONSISTENTE_3:
-            erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 + ' '
-        if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3 and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
-            return None
-        
-        return erros
+        return bem_formada and minima and len(sentencas) >= 3  
     
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # o ator deverá ser identificado na primeira sentença
     def retorna_ator_historia(texto, idioma):
         ator = ''
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
         tags = NLTK.processar(sentenca, idioma)
         
@@ -410,12 +270,13 @@ class NLTK:
             return ator
         else:
             return Constantes.ERRO_ATOR_INCONSISTENTE
+            
         
     # Conforme o layout de cenário (Dado/Quando/Então), o ator deverá ser identificado na primeira sentença
     # A palavra Dado/Given também deve estar presente
     def retorna_ator_cenario(texto, idioma):
         ator = ''
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
         tags = NLTK.processar(sentenca, idioma)
         
@@ -454,7 +315,7 @@ class NLTK:
     # a ação deverá ser identificado na segunda sentença
     def retorna_acao_historia(texto, idioma):
         acao = ''
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         
         if len(sentencas) >= 2:
             sentenca = sentencas[1]
@@ -497,7 +358,7 @@ class NLTK:
     # A palavra Quando/When também deve estar presente nessa sentença
     def retorna_acao_cenario(texto, idioma):
         acao = ''
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         posicao_ator = 0
         ator_encontrado = False
         posicao_acao = 0
@@ -510,7 +371,7 @@ class NLTK:
             elif (Constantes.QUANDO.lower() in sentenca.lower() or Constantes.WHEN.lower() in sentenca.lower()) and not acao_encontrada:
                 acao_encontrada = True
                 posicao_acao = sentencas.index(sentenca)
-            elif NLTK.verifica_ator_e_acao_e_finalidade_ja_encontrados(sentenca, ator_encontrado, acao_encontrada, False):
+            elif utils.verifica_ator_e_acao_e_finalidade_ja_encontrados(sentenca, ator_encontrado, acao_encontrada, False):
                 return Constantes.ERRO_ACAO_INCONSISTENTE_3
 
         ator_antes_da_acao = posicao_ator < posicao_acao
@@ -558,7 +419,7 @@ class NLTK:
     # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
     def retorna_finalidade_historia(texto, idioma):
         finalidade = ''
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         
         verbo = False
         substantivo = False
@@ -600,7 +461,7 @@ class NLTK:
     # A palavra Então/Then também deve estar presente nessa sentença
     def retorna_finalidade_cenario(texto, idioma):
         finalidade = ''
-        sentencas = NLTK.separar_sentencas(texto)
+        sentencas = utils.separar_sentencas(texto)
         posicao_ator = 0
         ator_encontrado = False
         posicao_acao = 0
@@ -618,7 +479,7 @@ class NLTK:
             elif (Constantes.ENTAO.lower() in sentenca.lower() or Constantes.THEN.lower() in sentenca.lower()) and not finalidade_encontrada:
                 finalidade_encontrada = True
                 posicao_finalidade = sentencas.index(sentenca)
-            elif NLTK.verifica_ator_e_acao_e_finalidade_ja_encontrados(sentenca, ator_encontrado, acao_encontrada, finalidade_encontrada):
+            elif utils.verifica_ator_e_acao_e_finalidade_ja_encontrados(sentenca, ator_encontrado, acao_encontrada, finalidade_encontrada):
                 return Constantes.ERRO_ACAO_INCONSISTENTE_3
             
         ordem_correta = posicao_ator < posicao_acao and posicao_acao < posicao_finalidade
@@ -658,33 +519,4 @@ class NLTK:
         if verbo and (pronome or preposicao or substantivo or adverbio) and ordem_correta:        
             return finalidade
         
-        return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2  
-   
-    
-    def separar_sentencas(texto):
-        return texto.split(',')  
-    
-    
-    def formatar_tempo(start, end):
-        return round(end - start, 5).__str__().replace('.',',') + ' segundos'
-    
-            
-    def limpar_mensagem_de_erro(input):
-        if input == Constantes.ERRO_ATOR_INCONSISTENTE:
-            return None
-        if input == Constantes.ERRO_ATOR_INCONSISTENTE_2:
-            return None
-        elif input == Constantes.ERRO_ACAO_INCONSISTENTE:
-            return None
-        elif input == Constantes.ERRO_ACAO_INCONSISTENTE_2:
-            return None
-        elif input == Constantes.ERRO_ACAO_INCONSISTENTE_3:
-            return None
-        elif input == Constantes.ERRO_FINALIDADE_INCONSISTENTE:
-            return None
-        elif input == Constantes.ERRO_FINALIDADE_INCONSISTENTE_2:
-            return None
-        
-        
-    def verifica_ator_e_acao_e_finalidade_ja_encontrados(sentenca, ator_encontrado, acao_encontrada, finalidade_encontrada):
-        return ((Constantes.DADO.lower() in sentenca.lower() or Constantes.GIVEN.lower() in sentenca.lower()) and ator_encontrado) or ((Constantes.QUANDO.lower() in sentenca.lower() or Constantes.WHEN.lower() in sentenca.lower()) and acao_encontrada) or ((Constantes.ENTAO.lower() in sentenca.lower() or Constantes.THEN.lower() in sentenca.lower()) and finalidade_encontrada)   
+        return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2
