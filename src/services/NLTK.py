@@ -63,16 +63,16 @@ class NLTK:
         tokens_palavras = []
              
         # Tokenização das sentenças
-        if idioma == 'en':
+        if idioma == Constantes.EN:
             tokens_sentencas = sent_tokenize(sentenca)
-        elif idioma == 'ptbr':
+        elif idioma ==  Constantes.PTBR:
             tokens_sentencas = sent_tokenize(sentenca, language='portuguese')
             
         # Tokenização das palavras
         for token in tokens_sentencas:
-            if idioma == 'en':
+            if idioma == Constantes.EN:
                 tokens_palavras.extend(word_tokenize(token))
-            elif idioma == 'ptbr':
+            elif idioma ==  Constantes.PTBR:
                 tokens_palavras.extend(word_tokenize(token, language='portuguese'))
         
         return tokens_palavras
@@ -94,9 +94,9 @@ class NLTK:
         #ptbr_tagger_trigram = joblib.load('POS_tagger_trigram.pkl')   
         tags = []
         
-        if idioma == 'en':
+        if idioma == Constantes.EN:
             tags = pos_tag(lemmas)
-        elif idioma == 'ptbr':    
+        elif idioma ==  Constantes.PTBR:    
             tags = ptbr_tagger_brill.tag(lemmas)
             
         return tags

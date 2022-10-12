@@ -23,12 +23,19 @@ WHEN = 'when'
 ENTAO = 'então'
 THEN = 'then'
 
+# Constantes spaCy
+SPACY_EN = 'en_core_web_sm'
+SPACY_PT = 'pt_core_news_sm'
+
+# Idiomas
+EN = 'en'
+PTBR = 'ptbr'
+
 # Mensagens de erro
 ERRO_ATOR_INCONSISTENTE = 'Erro de inconsistência no template de validação do ator da história de usuário.'
 ERRO_ACAO_INCONSISTENTE = 'Erro de inconsistência no template de validação da ação da história de usuário.'
 ERRO_FINALIDADE_INCONSISTENTE = 'Erro de inconsistência no template de validação da finalidade da história de usuário.'
+ERRO_FINALIDADE_INCONSISTENTE_2 = 'Erro de inconsistência no template de validação da finalidade dentro do cenário.'
 ERRO_ATOR_INCONSISTENTE_2 = 'Erro de inconsistência no template de validação do ator dentro do cenário.'
 ERRO_ACAO_INCONSISTENTE_2 = 'Erro de inconsistência no template de validação da ação dentro do cenário.'
-ERRO_FINALIDADE_INCONSISTENTE_2 = 'Erro de inconsistência no template de validação da finalidade dentro do cenário.'
-
 ERRO_ACAO_INCONSISTENTE_3 = 'Erro de inconsistência no template de validação da ação dentro do cenário. Um ou mais atores e/ou ações identificadas.'
