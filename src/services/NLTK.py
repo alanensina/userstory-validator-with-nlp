@@ -1,10 +1,8 @@
-from xmlrpc.client import Boolean
 import nltk, joblib, timeit
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize, sent_tokenize
 from src.classes.Response import Response
-from src.classes.Palavra import Palavra
 from src.classes import Constantes
 from src.services.Utils import utils
 
@@ -20,7 +18,7 @@ class NLTK:
         
         bem_formada = NLTK.verifica_C1_historia(historia, idioma)
         atomica = NLTK.verifica_C2_historia(historia, idioma)
-        minima = NLTK.verifica_C3_historia(historia, bem_formada)
+        minima = utils.verifica_C3_historia(historia, bem_formada)
         ator = NLTK.retorna_ator_historia(historia, idioma)    
         acao = NLTK.retorna_acao_historia(historia, idioma)      
         finalidade = NLTK.retorna_finalidade_historia(historia, idioma)  
@@ -171,7 +169,7 @@ class NLTK:
             if tag.classe == Constantes.VERBO:
                 verbos = verbos + 1
             
-        return verbos < 3
+        return (verbos < 3 and idioma == Constantes.PTBR) or (verbos <= 3 and idioma == Constantes.EN)
 
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Um cenário é atômico quando há apenas um objetivo na tarefa
@@ -201,19 +199,6 @@ class NLTK:
                 verbos = verbos + 1 
 
         return verbos < 3
-    
-    
-    # Função responsável para verificar o terceiro critério de qualidade: Mínima
-    # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
-    # e descrição esperada do comportamento deverá ser deixada de lado.
-    def verifica_C3_historia(texto, bem_formada):
-        sentencas = utils.separar_sentencas(texto)
-        
-        if bem_formada and len(sentencas) <= 3:
-            return True
-        
-        return False
-
 
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Um cenário é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários e descrição esperada do comportamento deverá ser deixada de lado.
@@ -240,118 +225,35 @@ class NLTK:
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # o ator deverá ser identificado na primeira sentença
     def retorna_ator_historia(texto, idioma):
-        ator = ''
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
         tags = NLTK.processar(sentenca, idioma)
         
-        substantivo = False
-        pronome = False
-        preposicao = False
-        artigo = False
-        
-        for tag in tags:
-            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO:
-                if ator == '':
-                    ator = tag.palavra
-                else:
-                    ator = ator + ' ' + tag.palavra
-            
-            if tag.classe == Constantes.SUBSTANTIVO:
-                substantivo = True
-            elif tag.classe == Constantes.PRONOME:
-                pronome = True
-            elif tag.classe == Constantes.PREPOSICAO:
-                preposicao = True
-            elif tag.classe == Constantes.ARTIGO:
-                artigo = True
-                    
-        if substantivo and (pronome or preposicao or artigo):
-            return ator
-        else:
-            return Constantes.ERRO_ATOR_INCONSISTENTE
-            
+        return utils.valida_ator_historia(tags)
+
         
     # Conforme o layout de cenário (Dado/Quando/Então), o ator deverá ser identificado na primeira sentença
     # A palavra Dado/Given também deve estar presente
     def retorna_ator_cenario(texto, idioma):
-        ator = ''
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
         tags = NLTK.processar(sentenca, idioma)
-        
-        dado_given = False
-        substantivo = False
-        pronome = False
-        preposicao = False
-        artigo = False
-        
-        if Constantes.DADO.lower() in sentenca.lower() or Constantes.GIVEN.lower() in sentenca.lower():
-            dado_given = True
-            
-        for tag in tags:
-            if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
-                if ator == '':
-                    ator = tag.palavra
-                else:
-                    ator = ator + ' ' + tag.palavra
-            
-            if tag.classe == Constantes.SUBSTANTIVO:
-                substantivo = True
-            elif tag.classe == Constantes.PRONOME:
-                pronome = True
-            elif tag.classe == Constantes.PREPOSICAO:
-                preposicao = True
-            elif tag.classe == Constantes.ARTIGO:
-                artigo = True
-                
-        if dado_given and substantivo and (pronome or preposicao or artigo):
-            return ator
-            
-        return Constantes.ERRO_ATOR_INCONSISTENTE_2
-        
+        return utils.valida_ator_cenario(tags, sentenca)
+       
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a ação deverá ser identificado na segunda sentença
     def retorna_acao_historia(texto, idioma):
-        acao = ''
         sentencas = utils.separar_sentencas(texto)
         
         if len(sentencas) >= 2:
             sentenca = sentencas[1]
         else:
-            return None
+            return Constantes.ERRO_ACAO_INCONSISTENTE
 
         tags = NLTK.processar(sentenca, idioma)
         
-        verbo = False
-        substantivo = False
-        pronome = False
-        preposicao = False
-        adverbio = False
-        
-        for tag in tags:
-            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.ADVERBIO:
-                if acao == '':
-                    acao = tag.palavra
-                else:
-                    acao = acao + ' ' + tag.palavra
-            
-            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
-                verbo = True
-            elif tag.classe == Constantes.SUBSTANTIVO:
-                substantivo = True
-            elif tag.classe == Constantes.PRONOME:
-                pronome = True
-            elif tag.classe == Constantes.PREPOSICAO:
-                preposicao = True
-            elif tag.classe == Constantes.ADVERBIO:
-                adverbio = True
-            
-        if verbo and substantivo and pronome and (preposicao or adverbio):        
-            return acao
-        else:
-            return Constantes.ERRO_ACAO_INCONSISTENTE
+        return utils.valida_acao_historia(tags)
 
         
     # Conforme o layout de cenário (Dado/Quando/Então), a ação deverá ser identificada em uma sentença posterior a sentença do ator
@@ -418,43 +320,13 @@ class NLTK:
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
     def retorna_finalidade_historia(texto, idioma):
-        finalidade = ''
         sentencas = utils.separar_sentencas(texto)
-        
-        verbo = False
-        substantivo = False
-        pronome = False
-        preposicao = False
-        adverbio = False
-        
+
         if len(sentencas) >= 3:
             sentenca = sentencas[2]
             tags = NLTK.processar(sentenca, idioma)
-            for tag in tags:
-                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ADVERBIO or tag.classe == Constantes.PARTICIPIO or tag.classe == Constantes.ADJETIVO or tag.classe == Constantes.ARTIGO:
-                    if finalidade == '':
-                        finalidade = tag.palavra
-                    else:
-                        finalidade = finalidade + ' ' + tag.palavra 
-                        
-                if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
-                    verbo = True
-                elif tag.classe == Constantes.SUBSTANTIVO:
-                    substantivo = True
-                elif tag.classe == Constantes.PRONOME:
-                    pronome = True
-                elif tag.classe == Constantes.PREPOSICAO:
-                    preposicao = True
-                elif tag.classe == Constantes.ADVERBIO:
-                    adverbio = True
-        else:
-            return None
-                    
-        if verbo and (pronome or preposicao or substantivo or adverbio):        
-            return finalidade
-
-        else:
-            return Constantes.ERRO_FINALIDADE_INCONSISTENTE
+            return utils.valida_finalidade_historia(tags)
+        return None
     
    
     # Conforme o layout de cenário (Dado/Quando/Então), a finalidade deverá ser identificada em uma sentença posterior a sentença do ator e da ação
