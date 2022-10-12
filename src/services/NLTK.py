@@ -125,7 +125,7 @@ class NLTK:
               return Constantes.ADJETIVO
           elif NLTK.verifica_substantivo(tagset):
               return Constantes.SUBSTANTIVO
-          elif tagset == 'NUM' or tagset == 'CD':
+          elif NLTK.verifica_numeral(tagset):
               return Constantes.NUMERAL
           elif NLTK.verifica_pronome(tagset):
               return Constantes.PRONOME
@@ -135,17 +135,17 @@ class NLTK:
               return Constantes.CONJUNCAO
           elif NLTK.verifica_preposicao(tagset):
               return Constantes.PREPOSICAO
-          elif tagset == 'IN' or tagset == 'UH':
+          elif NLTK.verifica_interjeicao(tagset):
               return Constantes.INTERJEICAO
           elif NLTK.verifica_verbo(tagset):
               return Constantes.VERBO
-          elif tagset == 'VAUX':
+          elif NLTK.verifica_verbo_aux(tagset):
               return Constantes.VERBO_AUX
-          elif tagset == 'PCP' or tagset == 'RP':
+          elif NLTK.verifica_participio(tagset):
               return Constantes.PARTICIPIO
-          elif tagset == 'PDEN':
+          elif NLTK.verifica_denotativo(tagset):
               return Constantes.PALAVRA_DEN
-          elif tagset == 'CUR':
+          elif NLTK.verifica_moeda(tagset):
               return Constantes.MOEDA        
           else:
               return Constantes.INVALIDO
@@ -154,6 +154,30 @@ class NLTK:
     def verifica_pronome(tagset):
         return tagset == 'PROADJ' or tagset == 'PROSUB' or tagset == 'PROPESS' or tagset == 'PRON' or tagset == 'PRO-KS' or tagset == 'PRO-KS-REL' or tagset == 'PRP' or tagset == 'PRP$' or tagset == 'WP'
     
+
+    def verifica_numeral(tagset):
+        return tagset == 'NUM' or tagset == 'CD'
+
+
+    def verifica_verbo_aux(tagset):
+        return tagset == 'VAUX' or tagset == 'AUX'
+
+
+    def verifica_denotativo(tagset):
+        return tagset == 'PDEN'
+
+
+    def verifica_moeda(tagset):
+        return tagset == 'CUR'
+
+
+    def verifica_participio(tagset):
+        return tagset == 'PCP' or tagset == 'RP'
+
+
+    def verifica_interjeicao(tagset):
+        return tagset == 'IN' or tagset == 'UH'
+        
     
     def verifica_adverbio(tagset):
         return tagset == 'ADV' or tagset == 'ADV-KS' or tagset == 'ADV-KS-REL' or tagset == 'RB' or tagset == 'RBS' or tagset == 'RBR' or tagset == 'WRB'
@@ -164,11 +188,11 @@ class NLTK:
     
     
     def verifica_conjuncao(tagset):
-        return tagset == 'KC' or tagset == 'KS' or tagset == 'CONJ' or tagset == 'CC' or tagset == 'IN'
+        return tagset == 'KC' or tagset == 'KS' or tagset == 'CONJ' or tagset == 'CC' or tagset == 'IN' or tagset == 'SCONJ'
     
     
     def verifica_verbo(tagset):
-        return tagset == 'V' or tagset == 'VERB' or tagset == 'VB' or tagset == 'VBD' or tagset == 'VBG' or tagset == 'VBN' or tagset == 'VBP' or tagset == 'VBG'or tagset == 'VBZ'
+        return tagset == 'V' or tagset == 'VERB' or tagset == 'VB' or tagset == 'VBD' or tagset == 'VBG' or tagset == 'VBN' or tagset == 'VBP' or tagset == 'VBG'or tagset == 'VBZ' or tagset == 'MD'
     
     
     def verifica_adjetivo(tagset):
@@ -176,7 +200,7 @@ class NLTK:
     
     
     def verifica_preposicao(tagset):
-        return tagset == 'PREP' or tagset == 'PRP' or tagset == 'TO'
+        return tagset == 'PREP' or tagset == 'PRP' or tagset == 'TO' or tagset == 'ADP'
     
     
     def verifica_artigo(tagset):
