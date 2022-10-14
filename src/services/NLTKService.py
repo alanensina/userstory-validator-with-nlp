@@ -4,24 +4,24 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize, sent_tokenize
 from src.classes.Response import Response
 from src.classes import Constantes
-from src.services.Utils import utils
+from src.services.UtilsService import utils
 
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 nltk.download('averaged_perceptron_tagger')
 
-class NLTK:
+class NLTKService():
     
     def processarHistoria(idioma:str, historia:str):
         start = timeit.default_timer()
         
-        bem_formada = NLTK.verifica_C1_historia(historia, idioma)
-        atomica = NLTK.verifica_C2_historia(historia, idioma)
+        bem_formada = NLTKService.verifica_C1_historia(historia, idioma)
+        atomica = NLTKService.verifica_C2_historia(historia, idioma)
         minima = utils.verifica_C3_historia(historia, bem_formada)
-        ator = NLTK.retorna_ator_historia(historia, idioma)    
-        acao = NLTK.retorna_acao_historia(historia, idioma)      
-        finalidade = NLTK.retorna_finalidade_historia(historia, idioma)  
+        ator = NLTKService.retorna_ator_historia(historia, idioma)    
+        acao = NLTKService.retorna_acao_historia(historia, idioma)      
+        finalidade = NLTKService.retorna_finalidade_historia(historia, idioma)  
         erros = utils.verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade)
         end = timeit.default_timer()  
         tempo = utils.formatar_tempo(start, end)
@@ -38,12 +38,12 @@ class NLTK:
     def processarCenario(idioma:str, cenario:str):
         start = timeit.default_timer()
         
-        bem_formada = NLTK.verifica_C1_cenario(cenario, idioma)
-        atomica = NLTK.verifica_C2_cenario(cenario, idioma)
+        bem_formada = NLTKService.verifica_C1_cenario(cenario, idioma)
+        atomica = NLTKService.verifica_C2_cenario(cenario, idioma)
         minima = utils.verifica_C3_cenario(cenario, bem_formada)
-        ator = NLTK.retorna_ator_cenario(cenario, idioma)    
-        acao = NLTK.retorna_acao_cenario(cenario, idioma)      
-        finalidade = NLTK.retorna_finalidade_cenario(cenario, idioma)
+        ator = NLTKService.retorna_ator_cenario(cenario, idioma)    
+        acao = NLTKService.retorna_acao_cenario(cenario, idioma)      
+        finalidade = NLTKService.retorna_finalidade_cenario(cenario, idioma)
         erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
         end = timeit.default_timer()  
         tempo = utils.formatar_tempo(start, end)
@@ -103,9 +103,9 @@ class NLTK:
 
     # Fluxo de processamento de texto no NLTK
     def processar(texto:str, idioma:str):
-        tokens_palavras = NLTK.tokenizar(texto, idioma)
-        lemas = NLTK.lematizar(tokens_palavras)
-        pre_tags = NLTK.tagging(lemas, idioma)
+        tokens_palavras = NLTKService.tokenizar(texto, idioma)
+        lemas = NLTKService.lematizar(tokens_palavras)
+        pre_tags = NLTKService.tagging(lemas, idioma)
         return utils.unificar_tagset(pre_tags, Constantes.NLTK)
     
     
@@ -125,9 +125,9 @@ class NLTK:
         if len(sentencas) < 2:
             return False
         
-        ator = NLTK.retorna_ator_historia(texto, idioma)
-        acao = NLTK.retorna_acao_historia(texto, idioma)
-        finalidade =  NLTK.retorna_finalidade_historia(texto, idioma)
+        ator = NLTKService.retorna_ator_historia(texto, idioma)
+        acao = NLTKService.retorna_acao_historia(texto, idioma)
+        finalidade =  NLTKService.retorna_finalidade_historia(texto, idioma)
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return True
@@ -141,9 +141,9 @@ class NLTK:
         if len(sentencas) < 3:
             return False
         
-        ator = NLTK.retorna_ator_cenario(texto, idioma)
-        acao = NLTK.retorna_acao_cenario(texto, idioma)
-        finalidade =  NLTK.retorna_finalidade_cenario(texto, idioma)
+        ator = NLTKService.retorna_ator_cenario(texto, idioma)
+        acao = NLTKService.retorna_acao_cenario(texto, idioma)
+        finalidade =  NLTKService.retorna_finalidade_cenario(texto, idioma)
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
             return True
@@ -164,7 +164,7 @@ class NLTK:
             return False
 
         # Processa a sentença destinada a ação (2ª sentença)
-        tags = NLTK.processar(sentencas[1], idioma)
+        tags = NLTKService.processar(sentencas[1], idioma)
 
         for tag in tags:
             if tag.classe == Constantes.VERBO and tag.palavra != 'would':
@@ -191,7 +191,7 @@ class NLTK:
             return False
 
        # Processa a sentença destinada a ação
-        tags = NLTK.processar(acoes[0], idioma)
+        tags = NLTKService.processar(acoes[0], idioma)
 
         verbos = 0
 
@@ -207,7 +207,7 @@ class NLTK:
     def retorna_ator_historia(texto, idioma):
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
-        tags = NLTK.processar(sentenca, idioma)
+        tags = NLTKService.processar(sentenca, idioma)
         
         return utils.valida_ator_historia(tags)
 
@@ -217,7 +217,7 @@ class NLTK:
     def retorna_ator_cenario(texto, idioma):
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
-        tags = NLTK.processar(sentenca, idioma)
+        tags = NLTKService.processar(sentenca, idioma)
         return utils.valida_ator_cenario(tags, sentenca)
        
         
@@ -231,7 +231,7 @@ class NLTK:
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE
 
-        tags = NLTK.processar(sentenca, idioma)
+        tags = NLTKService.processar(sentenca, idioma)
         
         return utils.valida_acao_historia(tags)
 
@@ -265,7 +265,7 @@ class NLTK:
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE_2
         
-        tags = NLTK.processar(sentenca, idioma)
+        tags = NLTKService.processar(sentenca, idioma)
         
         verbo = False
         substantivo = False
@@ -304,7 +304,7 @@ class NLTK:
 
         if len(sentencas) >= 3:
             sentenca = sentencas[2]
-            tags = NLTK.processar(sentenca, idioma)
+            tags = NLTKService.processar(sentenca, idioma)
             return utils.valida_finalidade_historia(tags)
         return None
     
@@ -348,7 +348,7 @@ class NLTK:
         else:
             return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2
         
-        tags = NLTK.processar(sentenca, idioma)
+        tags = NLTKService.processar(sentenca, idioma)
         
         for tag in tags:
                 if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ADVERBIO or tag.classe == Constantes.PARTICIPIO or tag.classe == Constantes.ADJETIVO or tag.classe == Constantes.ARTIGO:

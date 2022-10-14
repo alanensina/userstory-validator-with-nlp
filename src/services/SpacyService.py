@@ -1,18 +1,18 @@
-import spacy, timeit
 from src.classes.Response import Response
 from src.classes import Constantes
-from src.services.Utils import utils
+from src.services.UtilsService import utils
+import timeit, spacy
 
-class SPACY:
+class SpacyService():
     def processarHistoria(idioma:str, historia:str):
         start = timeit.default_timer()
         
-        bem_formada = SPACY.verifica_C1_historia(historia, idioma)
-        atomica = SPACY.verifica_C2_historia(historia, idioma)
+        bem_formada = SpacyService.verifica_C1_historia(historia, idioma)
+        atomica = SpacyService.verifica_C2_historia(historia, idioma)
         minima = utils.verifica_C3_historia(historia, bem_formada)
-        ator = SPACY.retorna_ator_historia(historia, idioma)    
-        acao = SPACY.retorna_acao_historia(historia, idioma)      
-        finalidade = SPACY.retorna_finalidade_historia(historia, idioma)  
+        ator = SpacyService.retorna_ator_historia(historia, idioma)    
+        acao = SpacyService.retorna_acao_historia(historia, idioma)      
+        finalidade = SpacyService.retorna_finalidade_historia(historia, idioma)  
         erros = utils.verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade)
         end = timeit.default_timer()  
         tempo = utils.formatar_tempo(start, end)
@@ -29,12 +29,12 @@ class SPACY:
     def processarCenario(idioma:str, cenario:str):
         start = timeit.default_timer()
         
-        bem_formada = SPACY.verifica_C1_cenario(cenario, idioma)
-        atomica = SPACY.verifica_C2_cenario(cenario, idioma)
+        bem_formada = SpacyService.verifica_C1_cenario(cenario, idioma)
+        atomica = SpacyService.verifica_C2_cenario(cenario, idioma)
         minima = utils.verifica_C3_cenario(cenario, bem_formada)
-        ator = SPACY.retorna_ator_cenario(cenario, idioma)    
-        acao = SPACY.retorna_acao_cenario(cenario, idioma)      
-        finalidade = SPACY.retorna_finalidade_cenario(cenario, idioma)
+        ator = SpacyService.retorna_ator_cenario(cenario, idioma)    
+        acao = SpacyService.retorna_acao_cenario(cenario, idioma)      
+        finalidade = SpacyService.retorna_finalidade_cenario(cenario, idioma)
         erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
         end = timeit.default_timer()  
         tempo = utils.formatar_tempo(start, end)
@@ -67,7 +67,7 @@ class SPACY:
     def retorna_ator_historia(texto, idioma):
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
-        tags = SPACY.processar(sentenca, idioma)
+        tags = SpacyService.processar(sentenca, idioma)
         
         return utils.valida_ator_historia(tags)
 
@@ -77,7 +77,7 @@ class SPACY:
     def retorna_ator_cenario(texto, idioma):
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
-        tags = SPACY.processar(sentenca, idioma)
+        tags = SpacyService.processar(sentenca, idioma)
         return utils.valida_ator_cenario(tags, sentenca)
 
     
@@ -91,7 +91,7 @@ class SPACY:
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE
 
-        tags = SPACY.processar(sentenca, idioma)
+        tags = SpacyService.processar(sentenca, idioma)
         
         return utils.valida_acao_historia(tags)
 
@@ -125,7 +125,7 @@ class SPACY:
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE_2
         
-        tags = SPACY.processar(sentenca, idioma)
+        tags = SpacyService.processar(sentenca, idioma)
         
         verbo = False
         substantivo = False
@@ -164,7 +164,7 @@ class SPACY:
 
         if len(sentencas) >= 3:
             sentenca = sentencas[2]
-            tags = SPACY.processar(sentenca, idioma)
+            tags = SpacyService.processar(sentenca, idioma)
             return utils.valida_finalidade_historia(tags)
         return None
 
@@ -208,7 +208,7 @@ class SPACY:
         else:
             return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2
         
-        tags = SPACY.processar(sentenca, idioma)
+        tags = SpacyService.processar(sentenca, idioma)
         
         for tag in tags:
                 if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX or tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.ADVERBIO or tag.classe == Constantes.PARTICIPIO or tag.classe == Constantes.ADJETIVO or tag.classe == Constantes.ARTIGO:
@@ -250,9 +250,9 @@ class SPACY:
         if len(sentencas) < 2:
             return False
         
-        ator = SPACY.retorna_ator_historia(texto, idioma)
-        acao = SPACY.retorna_acao_historia(texto, idioma)
-        finalidade =  SPACY.retorna_finalidade_historia(texto, idioma)
+        ator = SpacyService.retorna_ator_historia(texto, idioma)
+        acao = SpacyService.retorna_acao_historia(texto, idioma)
+        finalidade =  SpacyService.retorna_finalidade_historia(texto, idioma)
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return True
@@ -266,9 +266,9 @@ class SPACY:
         if len(sentencas) < 3:
             return False
         
-        ator = SPACY.retorna_ator_cenario(texto, idioma)
-        acao = SPACY.retorna_acao_cenario(texto, idioma)
-        finalidade =  SPACY.retorna_finalidade_cenario(texto, idioma)
+        ator = SpacyService.retorna_ator_cenario(texto, idioma)
+        acao = SpacyService.retorna_acao_cenario(texto, idioma)
+        finalidade =  SpacyService.retorna_finalidade_cenario(texto, idioma)
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
             return True
@@ -289,7 +289,7 @@ class SPACY:
             return False
 
         # Processa a sentença destinada a ação (2ª sentença)
-        tags = SPACY.processar(sentencas[1], idioma)
+        tags = SpacyService.processar(sentencas[1], idioma)
 
         for tag in tags:
             if tag.classe == Constantes.VERBO and tag.palavra != 'would':
@@ -317,7 +317,7 @@ class SPACY:
             return False
 
        # Processa a sentença destinada a ação
-        tags = SPACY.processar(acoes[0], idioma)
+        tags = SpacyService.processar(acoes[0], idioma)
 
         verbos = 0
 

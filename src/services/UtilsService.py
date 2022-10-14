@@ -1,7 +1,7 @@
 from src.classes import Constantes
 from src.classes.Palavra import Palavra
 
-class Utils():
+class UtilsService():
 
     def __init__(self):
         pass 
@@ -11,11 +11,11 @@ class Utils():
 
         if tecnologia == Constantes.NLTK:
             for tupla in tags:
-                tagsets.append(Palavra(tupla[0], tupla[1], Utils.get_classe_gramatical(tupla[1])))
+                tagsets.append(Palavra(tupla[0], tupla[1], UtilsService.get_classe_gramatical(tupla[1])))
 
         elif tecnologia == Constantes.SPACY:
             for token in tags:
-                tagsets.append(Palavra(token.text, token.tag_, Utils.get_classe_gramatical(token.tag_))) 
+                tagsets.append(Palavra(token.text, token.tag_, UtilsService.get_classe_gramatical(token.tag_))) 
 
         print('---------- ' + tecnologia + ' ----------')
         
@@ -28,33 +28,33 @@ class Utils():
 
     # Função responsável em retornar a classe gramatical conforme o tagset
     def get_classe_gramatical(tagset):
-          if Utils.verifica_artigo(tagset):
+          if UtilsService.verifica_artigo(tagset):
               return Constantes.ARTIGO
-          elif Utils.verifica_adjetivo(tagset):
+          elif UtilsService.verifica_adjetivo(tagset):
               return Constantes.ADJETIVO
-          elif Utils.verifica_substantivo(tagset):
+          elif UtilsService.verifica_substantivo(tagset):
               return Constantes.SUBSTANTIVO
-          elif Utils.verifica_numeral(tagset):
+          elif UtilsService.verifica_numeral(tagset):
               return Constantes.NUMERAL
-          elif Utils.verifica_pronome(tagset):
+          elif UtilsService.verifica_pronome(tagset):
               return Constantes.PRONOME
-          elif Utils.verifica_adverbio(tagset):
+          elif UtilsService.verifica_adverbio(tagset):
               return Constantes.ADVERBIO
-          elif Utils.verifica_conjuncao(tagset):
+          elif UtilsService.verifica_conjuncao(tagset):
               return Constantes.CONJUNCAO
-          elif Utils.verifica_preposicao(tagset):
+          elif UtilsService.verifica_preposicao(tagset):
               return Constantes.PREPOSICAO
-          elif Utils.verifica_interjeicao(tagset):
+          elif UtilsService.verifica_interjeicao(tagset):
               return Constantes.INTERJEICAO
-          elif Utils.verifica_verbo(tagset):
+          elif UtilsService.verifica_verbo(tagset):
               return Constantes.VERBO
-          elif Utils.verifica_verbo_aux(tagset):
+          elif UtilsService.verifica_verbo_aux(tagset):
               return Constantes.VERBO_AUX
-          elif Utils.verifica_participio(tagset):
+          elif UtilsService.verifica_participio(tagset):
               return Constantes.PARTICIPIO
-          elif Utils.verifica_denotativo(tagset):
+          elif UtilsService.verifica_denotativo(tagset):
               return Constantes.PALAVRA_DEN
-          elif Utils.verifica_moeda(tagset):
+          elif UtilsService.verifica_moeda(tagset):
               return Constantes.MOEDA        
           else:
               return Constantes.INVALIDO
@@ -318,7 +318,7 @@ class Utils():
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
     # e descrição esperada do comportamento deverá ser deixada de lado.
     def verifica_C3_historia(self, texto, bem_formada):
-        sentencas = Utils.separar_sentencas(self, texto)
+        sentencas = UtilsService.separar_sentencas(self, texto)
         
         if bem_formada and len(sentencas) <= 3:
             return True
@@ -348,4 +348,4 @@ class Utils():
         return bem_formada and minima and len(sentencas) >= 3 
 
 
-utils = Utils()
+utils = UtilsService()

@@ -4,7 +4,7 @@ from src.server.instance import server
 from src.models.historia import historia
 from src.models.cenario import cenario
 from src.models.response import response
-from src.services.processador import processador
+from src.services.ProcessadorService import processador
 
 app, api = server.app, server.api
 
