@@ -1,7 +1,7 @@
 from flask_restx import fields
 from src.server.instance import server
 
-response_historia = server.api.model('Response', {
+response_historia = server.api.model('Response História', {
     'texto': fields.String(description='Texto processado'),
     'tecnologia': fields.String(description='Tecnologia utilizada'),
     'tempo': fields.String(description='Tempo de processamento'),
@@ -14,7 +14,7 @@ response_historia = server.api.model('Response', {
     'erros': fields.String(description='Possíveis erros encontrados')
 })
 
-response_cenario = server.api.model('Response', {
+response_cenario = server.api.model('Response Cenário', {
     'texto': fields.String(description='Texto processado'),
     'tecnologia': fields.String(description='Tecnologia utilizada'),
     'tempo': fields.String(description='Tempo de processamento'),
