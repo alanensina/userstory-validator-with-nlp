@@ -1,4 +1,5 @@
-from src.classes.Response import Response
+from src.classes.ResponseHistoria import ResponseHistoria
+from src.classes.ResponseCenario import ResponseCenario
 from src.classes import Constantes
 from src.services.UtilsService import utils
 import timeit, spacy
@@ -18,12 +19,12 @@ class SpacyService():
         tempo = utils.formatar_tempo(start, end)
 
         if erros == None:
-            return Response(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+            return ResponseHistoria(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
         else:
             ator = utils.limpar_mensagem_de_erro(ator)
             acao = utils.limpar_mensagem_de_erro(acao)   
             finalidade = utils.limpar_mensagem_de_erro(finalidade)
-            return Response(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros) 
+            return ResponseHistoria(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros) 
 
     
     def processarCenario(idioma:str, cenario:str):
@@ -32,20 +33,20 @@ class SpacyService():
         bem_formada = SpacyService.verifica_C1_cenario(cenario, idioma)
         atomica = SpacyService.verifica_C2_cenario(cenario, idioma)
         minima = utils.verifica_C3_cenario(cenario, bem_formada)
-        ator = SpacyService.retorna_ator_cenario(cenario, idioma)    
+        precondicao = SpacyService.retorna_precondicao_cenario(cenario, idioma)    
         acao = SpacyService.retorna_acao_cenario(cenario, idioma)      
         finalidade = SpacyService.retorna_finalidade_cenario(cenario, idioma)
-        erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
+        erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, precondicao, acao, finalidade)        
         end = timeit.default_timer()  
         tempo = utils.formatar_tempo(start, end)
 
         if erros == None:
-            return Response(cenario, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+            return ResponseCenario(cenario, Constantes.SPACY, tempo, bem_formada, atomica, minima, precondicao, acao, finalidade, erros)
         else:
-            ator = utils.limpar_mensagem_de_erro(ator)
+            precondicao = utils.limpar_mensagem_de_erro(precondicao)
             acao = utils.limpar_mensagem_de_erro(acao)   
             finalidade = utils.limpar_mensagem_de_erro(finalidade)
-            return Response(cenario, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)    
+            return ResponseCenario(cenario, Constantes.SPACY, tempo, bem_formada, atomica, minima, precondicao, acao, finalidade, erros)    
 
 
     def processar(texto, idioma):
@@ -72,13 +73,13 @@ class SpacyService():
         return utils.valida_ator_historia(tags)
 
     
-    # Conforme o layout de cenário (Dado/Quando/Então), o ator deverá ser identificado na primeira sentença
+    # Conforme o layout de cenário (Dado/Quando/Então), a pré-condição deverá ser identificada na primeira sentença
     # A palavra Dado/Given também deve estar presente
-    def retorna_ator_cenario(texto, idioma):
+    def retorna_precondicao_cenario(texto, idioma):
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
         tags = SpacyService.processar(sentenca, idioma)
-        return utils.valida_ator_cenario(tags, sentenca)
+        return utils.valida_precondicao_cenario(tags, sentenca)
 
     
      # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
@@ -266,11 +267,11 @@ class SpacyService():
         if len(sentencas) < 3:
             return False
         
-        ator = SpacyService.retorna_ator_cenario(texto, idioma)
+        precondicao = SpacyService.retorna_precondicao_cenario(texto, idioma)
         acao = SpacyService.retorna_acao_cenario(texto, idioma)
         finalidade =  SpacyService.retorna_finalidade_cenario(texto, idioma)
         
-        if ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
+        if precondicao != Constantes.ERRO_PRECONDICAO_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
             return True
         
         return False

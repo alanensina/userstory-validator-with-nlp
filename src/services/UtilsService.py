@@ -127,7 +127,7 @@ class UtilsService():
     def limpar_mensagem_de_erro(self, input):
         if input == Constantes.ERRO_ATOR_INCONSISTENTE:
             return None
-        if input == Constantes.ERRO_ATOR_INCONSISTENTE_2:
+        if input == Constantes.ERRO_PRECONDICAO_INCONSISTENTE:
             return None
         elif input == Constantes.ERRO_ACAO_INCONSISTENTE:
             return None
@@ -165,7 +165,7 @@ class UtilsService():
         return erros
 
     
-    def verifica_erros_cenario(self, bem_formada, atomica, minima, ator, acao, finalidade):
+    def verifica_erros_cenario(self, bem_formada, atomica, minima, precondicao, acao, finalidade):
         erros = ''
         if not bem_formada:
             erros = 'O cenário não atende ao primeiro critério de qualidade que é Bem formada. '
@@ -173,8 +173,8 @@ class UtilsService():
             erros = erros + 'O cenário não atende ao segundo critério de qualidade que é Atômica. '
         if not minima:
             erros = erros + 'O cenário não atende ao terceiro critério de qualidade que é Mínima. '
-        if ator == Constantes.ERRO_ATOR_INCONSISTENTE_2:
-            erros = erros + Constantes.ERRO_ATOR_INCONSISTENTE_2 + ' '
+        if precondicao == Constantes.ERRO_PRECONDICAO_INCONSISTENTE:
+            erros = erros + Constantes.ERRO_PRECONDICAO_INCONSISTENTE + ' '
         if acao == Constantes.ERRO_ACAO_INCONSISTENTE_2:
             erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE_2 + ' '
         if acao == Constantes.ERRO_ACAO_INCONSISTENTE_3:
@@ -183,7 +183,7 @@ class UtilsService():
             erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 + ' '
         if finalidade == Constantes.ERRO_ACAO_INCONSISTENTE_3:
             erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 + ' '
-        if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3 and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
+        if bem_formada and atomica and minima and precondicao != Constantes.ERRO_PRECONDICAO_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3 and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE_2 and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
             return None
         
         return erros
@@ -217,23 +217,23 @@ class UtilsService():
             return Constantes.ERRO_ATOR_INCONSISTENTE
 
     
-    def valida_ator_cenario(self, tags, sentenca):
+    def valida_precondicao_cenario(self, tags, sentenca):
         dado_given = False
         substantivo = False
         pronome = False
         preposicao = False
         artigo = False
-        ator = ''
+        precondicao = ''
         
         if Constantes.DADO.lower() in sentenca.lower() or Constantes.GIVEN.lower() in sentenca.lower():
             dado_given = True
             
         for tag in tags:
             if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
-                if ator == '':
-                    ator = tag.palavra
+                if precondicao == '':
+                    precondicao = tag.palavra
                 else:
-                    ator = ator + ' ' + tag.palavra
+                    precondicao = precondicao + ' ' + tag.palavra
             
             if tag.classe == Constantes.SUBSTANTIVO:
                 substantivo = True
@@ -245,9 +245,9 @@ class UtilsService():
                 artigo = True
                 
         if dado_given and substantivo and (pronome or preposicao or artigo):
-            return ator
+            return precondicao
             
-        return Constantes.ERRO_ATOR_INCONSISTENTE_2
+        return Constantes.ERRO_PRECONDICAO_INCONSISTENTE
 
 
     def valida_acao_historia(self, tags):

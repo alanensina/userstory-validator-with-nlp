@@ -2,7 +2,8 @@ import nltk, joblib, timeit
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize, sent_tokenize
-from src.classes.Response import Response
+from src.classes.ResponseHistoria import ResponseHistoria
+from src.classes.ResponseCenario import ResponseCenario
 from src.classes import Constantes
 from src.services.UtilsService import utils
 
@@ -27,12 +28,12 @@ class NLTKService():
         tempo = utils.formatar_tempo(start, end)
 
         if erros == None:
-            return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+            return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
         else:
             ator = utils.limpar_mensagem_de_erro(ator)
             acao = utils.limpar_mensagem_de_erro(acao)   
             finalidade = utils.limpar_mensagem_de_erro(finalidade)
-            return Response(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)   
+            return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)   
            
         
     def processarCenario(idioma:str, cenario:str):
@@ -41,20 +42,20 @@ class NLTKService():
         bem_formada = NLTKService.verifica_C1_cenario(cenario, idioma)
         atomica = NLTKService.verifica_C2_cenario(cenario, idioma)
         minima = utils.verifica_C3_cenario(cenario, bem_formada)
-        ator = NLTKService.retorna_ator_cenario(cenario, idioma)    
+        precondicao = NLTKService.retorna_precondicao_cenario(cenario, idioma)    
         acao = NLTKService.retorna_acao_cenario(cenario, idioma)      
         finalidade = NLTKService.retorna_finalidade_cenario(cenario, idioma)
-        erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, ator, acao, finalidade)        
+        erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, precondicao, acao, finalidade)        
         end = timeit.default_timer()  
         tempo = utils.formatar_tempo(start, end)
 
         if erros == None:
-            return Response(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+            return ResponseCenario(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, precondicao, acao, finalidade, erros)
         else:
-            ator = utils.limpar_mensagem_de_erro(ator)
+            precondicao = utils.limpar_mensagem_de_erro(precondicao)
             acao = utils.limpar_mensagem_de_erro(acao)   
             finalidade = utils.limpar_mensagem_de_erro(finalidade)
-            return Response(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+            return ResponseCenario(cenario, Constantes.NLTK, tempo, bem_formada, atomica, minima, precondicao, acao, finalidade, erros)
     
     
     def tokenizar(sentenca:str, idioma:str):   
@@ -141,11 +142,11 @@ class NLTKService():
         if len(sentencas) < 3:
             return False
         
-        ator = NLTKService.retorna_ator_cenario(texto, idioma)
+        precondicao = NLTKService.retorna_precondicao_cenario(texto, idioma)
         acao = NLTKService.retorna_acao_cenario(texto, idioma)
         finalidade =  NLTKService.retorna_finalidade_cenario(texto, idioma)
         
-        if ator != Constantes.ERRO_ATOR_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
+        if precondicao != Constantes.ERRO_PRECONDICAO_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE_2 and acao != Constantes.ERRO_ACAO_INCONSISTENTE_3  and finalidade != Constantes.ERRO_ACAO_INCONSISTENTE_3:
             return True
         
         return False
@@ -212,13 +213,13 @@ class NLTKService():
         return utils.valida_ator_historia(tags)
 
         
-    # Conforme o layout de cenário (Dado/Quando/Então), o ator deverá ser identificado na primeira sentença
+    # Conforme o layout de cenário (Dado/Quando/Então), a pré-condição deverá ser identificado na primeira sentença
     # A palavra Dado/Given também deve estar presente
-    def retorna_ator_cenario(texto, idioma):
+    def retorna_precondicao_cenario(texto, idioma):
         sentencas = utils.separar_sentencas(texto)
         sentenca = sentencas[0]
         tags = NLTKService.processar(sentenca, idioma)
-        return utils.valida_ator_cenario(tags, sentenca)
+        return utils.valida_precondicao_cenario(tags, sentenca)
        
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 

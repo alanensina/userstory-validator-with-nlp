@@ -36,6 +36,6 @@ ERRO_ATOR_INCONSISTENTE = 'Erro de inconsistência no template de validação do
 ERRO_ACAO_INCONSISTENTE = 'Erro de inconsistência no template de validação da ação da história de usuário.'
 ERRO_FINALIDADE_INCONSISTENTE = 'Erro de inconsistência no template de validação da finalidade da história de usuário.'
 ERRO_FINALIDADE_INCONSISTENTE_2 = 'Erro de inconsistência no template de validação da finalidade dentro do cenário.'
-ERRO_ATOR_INCONSISTENTE_2 = 'Erro de inconsistência no template de validação do ator dentro do cenário.'
+ERRO_PRECONDICAO_INCONSISTENTE = 'Erro de inconsistência no template de validação da pré-condição dentro do cenário.'
 ERRO_ACAO_INCONSISTENTE_2 = 'Erro de inconsistência no template de validação da ação dentro do cenário.'
 ERRO_ACAO_INCONSISTENTE_3 = 'Erro de inconsistência no template de validação da ação dentro do cenário. Um ou mais atores e/ou ações identificadas.'

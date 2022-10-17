@@ -1,4 +1,4 @@
-class Response():
+class ResponseHistoria():
     def __init__(self, texto, tecnologia, tempo, bemFormada, atomica,
                  minima, ator, acao, finalidade, erros):
         self.texto = texto
