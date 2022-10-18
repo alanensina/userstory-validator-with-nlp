@@ -1,0 +1,10 @@
+- alterar estrutura para a remoção das virgulas. "Engessar" palavras chave como: Eu como/gostaria/para
+- exibir no Response as palavras e tags processadas para que seja possível realizar uma análise depois das tecnologias
+- verificar validações de cenários para ação e finalidade (msgs de erro)
+- ação de cenários poderá conter vários verbos, pois poderá ser condições
+- levantar cenários para o Mattheus validar
+
+indicadores:
+- tempo de processamento
+- assertividade de tags (cada idioma e geral)
+- avaliar cada critério de qualidade dentro de cada tecnologia e cada idioma
