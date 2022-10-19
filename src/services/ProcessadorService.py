@@ -20,7 +20,7 @@ class ProcessadorService():
             elif type == 'cenario':
                 cenario = p.get('cenario')
                 response.append(NLTKService.processarCenario(idioma, cenario))
-                #response.append(SpacyService.processarCenario(idioma, cenario))
+                response.append(SpacyService.processarCenario(idioma, cenario))
                 
         return response
 
