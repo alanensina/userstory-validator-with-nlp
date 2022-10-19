@@ -18,13 +18,6 @@ class UtilsService():
             for token in tags:
                 tagsets.append(Palavra(token.text, token.tag_, UtilsService.get_classe_gramatical(token.tag_))) 
 
-        print('---------- ' + tecnologia + ' ----------')
-        
-        for tag in tagsets:
-            print(tag)
-        
-        print('-----------------------')
-
         return tagsets
 
     # Função responsável em retornar a classe gramatical conforme o tagset

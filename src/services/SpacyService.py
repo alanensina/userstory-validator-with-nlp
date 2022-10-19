@@ -7,24 +7,49 @@ import timeit, spacy
 class SpacyService():
     def processarHistoria(idioma:str, historia:str):
         start = timeit.default_timer()
-        
-        bem_formada = SpacyService.verifica_C1_historia(historia, idioma)
-        atomica = SpacyService.verifica_C2_historia(historia, idioma)
-        minima = utils.verifica_C3_historia(historia, bem_formada)
-        ator = SpacyService.retorna_ator_historia(historia, idioma)    
-        acao = SpacyService.retorna_acao_historia(historia, idioma)      
-        finalidade = SpacyService.retorna_finalidade_historia(historia, idioma)  
-        erros = utils.verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade)
-        end = timeit.default_timer()  
-        tempo = utils.formatar_tempo(start, end)
+        finalidade = None
+        erros = None
 
-        if erros == None:
-            return ResponseHistoria(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+        sentencas = utils.separar_sentencas_historia(historia)
+
+        sentencas_processadas = []
+
+        if len(sentencas) > 1 and not utils.verifica_erro_separacao(sentencas):
+            x = 0
+
+            while x < len(sentencas):
+                sentencas_processadas.append(SpacyService.processar(sentencas[x], idioma))
+                x = x + 1
+
+            tags = []
+            for sp in sentencas_processadas:
+                for s in sp:
+                    tags.append(s.retorna_estrutura())
+
+            bem_formada = SpacyService.verifica_C1_historia(sentencas_processadas)
+            atomica = SpacyService.verifica_C2_historia(sentencas_processadas)
+            minima = utils.verifica_C3_historia(sentencas_processadas, bem_formada)
+            ator = utils.extrair_ator(sentencas_processadas[0])    
+            acao = utils.extrair_acao(sentencas_processadas[1]) 
+
+            if len(sentencas) > 2:
+                finalidade = utils.extrair_finalidade(sentencas_processadas[2])  
+                erros = utils.verifica_erros_historia(bem_formada, atomica, minima, utils.valida_ator_historia(sentencas_processadas[0]), utils.valida_acao_historia(sentencas_processadas[1]), utils.valida_finalidade_historia(sentencas_processadas[2]))
+            else:
+                erros = utils.verifica_erros_historia(bem_formada, atomica, minima, utils.valida_ator_historia(sentencas_processadas[0]), utils.valida_acao_historia(sentencas_processadas[1]), None)
+
+            end = timeit.default_timer()  
+            tempo = utils.formatar_tempo(start, end)
+
+            if erros == None:
+                return ResponseHistoria(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, tags, erros)
+            else:
+                return ResponseHistoria(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, tags, erros) 
+
         else:
-            ator = utils.limpar_mensagem_de_erro(ator)
-            acao = utils.limpar_mensagem_de_erro(acao)   
-            finalidade = utils.limpar_mensagem_de_erro(finalidade)
-            return ResponseHistoria(historia, Constantes.SPACY, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros) 
+            end = timeit.default_timer()  
+            tempo = utils.formatar_tempo(start, end)
+            return utils.retorna_erro_historia(historia, Constantes.SPACY, sentencas, tempo)
 
     
     def processarCenario(idioma:str, cenario:str):
@@ -65,11 +90,7 @@ class SpacyService():
 
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # o ator deverá ser identificado na primeira sentença
-    def retorna_ator_historia(texto, idioma):
-        sentencas = utils.separar_sentencas(texto)
-        sentenca = sentencas[0]
-        tags = SpacyService.processar(sentenca, idioma)
-        
+    def retorna_ator_historia(tags):
         return utils.valida_ator_historia(tags)
 
     
@@ -84,16 +105,7 @@ class SpacyService():
     
      # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a ação deverá ser identificado na segunda sentença
-    def retorna_acao_historia(texto, idioma):
-        sentencas = utils.separar_sentencas(texto)
-        
-        if len(sentencas) >= 2:
-            sentenca = sentencas[1]
-        else:
-            return Constantes.ERRO_ACAO_INCONSISTENTE
-
-        tags = SpacyService.processar(sentenca, idioma)
-        
+    def retorna_acao_historia(tags):
         return utils.valida_acao_historia(tags)
 
 
@@ -160,14 +172,8 @@ class SpacyService():
 
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
-    def retorna_finalidade_historia(texto, idioma):
-        sentencas = utils.separar_sentencas(texto)
-
-        if len(sentencas) >= 3:
-            sentenca = sentencas[2]
-            tags = SpacyService.processar(sentenca, idioma)
-            return utils.valida_finalidade_historia(tags)
-        return None
+    def retorna_finalidade_historia(tags):
+        return utils.valida_finalidade_historia(tags)
 
     
     # Conforme o layout de cenário (Dado/Quando/Então), a finalidade deverá ser identificada em uma sentença posterior a sentença do ator e da ação
@@ -245,15 +251,16 @@ class SpacyService():
     # Verbo -> Verbo
     # Objeto indireto (opcional) -> Substantivo ou pronome
     # Objeto direto -> Substantivo ou pronome
-    def verifica_C1_historia(texto, idioma):
-        sentencas = utils.separar_sentencas(texto)
-        
-        if len(sentencas) < 2:
+    def verifica_C1_historia(sentencas_processadas):        
+        if len(sentencas_processadas) < 2:
             return False
+
+        finalidade = None
         
-        ator = SpacyService.retorna_ator_historia(texto, idioma)
-        acao = SpacyService.retorna_acao_historia(texto, idioma)
-        finalidade =  SpacyService.retorna_finalidade_historia(texto, idioma)
+        ator = SpacyService.retorna_ator_historia(sentencas_processadas[0])
+        acao = SpacyService.retorna_acao_historia(sentencas_processadas[1])
+        if len(sentencas_processadas) > 2:
+            finalidade =  SpacyService.retorna_finalidade_historia(sentencas_processadas[2])
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return True
@@ -281,16 +288,13 @@ class SpacyService():
     # Uma história é atômica quando há apenas um objetivo na tarefa
     # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a segunda sentença possui menos que 3 verbos
     # Caso a sentença não se enquadre no templete de ação, a história de usuário não será atômica
-    def verifica_C2_historia(texto, idioma):
-        sentencas = utils.separar_sentencas(texto)
-        sentencas_tamanho = len(sentencas)
+    def verifica_C2_historia(sentencas_processadas):
         verbos = 0
 
-        if sentencas_tamanho < 2:
+        if len(sentencas_processadas) < 2:
             return False
 
-        # Processa a sentença destinada a ação (2ª sentença)
-        tags = SpacyService.processar(sentencas[1], idioma)
+        tags = sentencas_processadas[1]
 
         for tag in tags:
             if tag.classe == Constantes.VERBO and tag.palavra != 'would':

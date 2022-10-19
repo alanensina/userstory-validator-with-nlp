@@ -186,7 +186,6 @@ class NLTKService():
         if len(sentencas_processadas) < 2:
             return False
 
-        # Processa a sentença destinada a ação (2ª sentença)
         tags = sentencas_processadas[1]
 
         for tag in tags:
