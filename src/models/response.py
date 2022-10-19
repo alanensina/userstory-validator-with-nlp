@@ -14,7 +14,6 @@ response_historia = server.api.model('Response História', {
     'tags': fields.List(fields.String(description = 'Tags utilizadas')),
     'erros': fields.String(description='Possíveis erros encontrados')
 })
-#fields.List(fields.String(example="user1")))
 
 response_cenario = server.api.model('Response Cenário', {
     'texto': fields.String(description='Texto processado'),
@@ -26,5 +25,6 @@ response_cenario = server.api.model('Response Cenário', {
     'preCondicao': fields.String(description='Pré-condição do cenário'),
     'acao': fields.String(description='Ação realizada'),
     'finalidade': fields.String(description='Finalidade da ação. É opcional.'),
+    'tags': fields.List(fields.String(description = 'Tags utilizadas')),
     'erros': fields.String(description='Possíveis erros encontrados')
 })

@@ -109,12 +109,9 @@ class UtilsService():
     def verifica_artigo(tagset):
         return tagset == 'ART' or tagset == 'DET' or tagset == 'DT' or tagset == 'WDT'
 
-    
-    def separar_sentencas(self, texto):
-        return texto.split(',')
 
     def verifica_erro_separacao(self, erro):
-        return erro == Constantes.ERRO_ATOR_INEXISTENTE or erro == Constantes.ERRO_ACAO_INEXISTENTE
+        return erro == Constantes.ERRO_ATOR_INEXISTENTE or erro == Constantes.ERRO_ACAO_INEXISTENTE or erro == Constantes.ERRO_PRECONDICAO_INEXISTENTE or erro == Constantes.ERRO_ACAO_INEXISTENTE_CENARIO or erro == Constantes.ERRO_FINALIDADE_INEXISTENTE_CENARIO or erro == Constantes.ERRO_ORDENACAO_CENARIO
 
     # As histórias devem ter suas sentenças separadas através de palavras-chave para que cada sentença seja avaliada independentemente
     # Palavras-chave:
@@ -186,6 +183,75 @@ class UtilsService():
                     pos_para = pos_para + 1
 
         sentencas.append(ator)
+        sentencas.append(acao)
+
+        if finalidade != '':
+            sentencas.append(finalidade)
+
+        return sentencas
+
+
+    # Os cenários devem ter suas sentenças separadas através de palavras-chave para que cada sentença seja avaliada independentemente
+    # Palavras-chave:
+    # Dado/Given -> primeira sentença, identificará a pré-condição
+    # Quando/When -> segunda sentença, identificará a ação
+    # Então/Then -> terceira sentença, identificará a finalidade
+    def separar_sentencas_cenario(self, texto):
+        sentencas = []
+        palavras = texto.split()
+
+        pos_dado = -1
+        pos_quando = -1
+        pos_entao = -1
+
+        for p in palavras:
+            if (p.lower() == 'dado' or  p.lower() == 'given') and pos_dado == -1:
+                pos_dado = palavras.index(p)
+            elif (p.lower() == 'quando' or p.lower() == 'when') and pos_quando == -1:
+                pos_quando = palavras.index(p)
+            elif (p.lower() == 'então' or p.lower() == 'then') and pos_entao == -1:
+                pos_entao = palavras.index(p)
+
+        preCondicao = ''
+        acao = ''
+        finalidade = ''
+
+        if pos_dado == -1:
+            return Constantes.ERRO_PRECONDICAO_INEXISTENTE
+
+        if pos_quando == -1:
+            return Constantes.ERRO_ACAO_INEXISTENTE_CENARIO
+
+        if pos_entao == -1:
+            return Constantes.ERRO_FINALIDADE_INEXISTENTE_CENARIO
+
+        if not ((pos_dado < pos_quando) and (pos_quando < pos_entao)):
+             return Constantes.ERRO_ORDENACAO_CENARIO        
+
+        for x in range(pos_quando):
+            if preCondicao == '':
+                preCondicao = palavras[x]
+            else:
+                preCondicao = preCondicao + ' ' + palavras[x]
+
+        while pos_quando < pos_entao:
+            if acao == '':
+                acao = palavras[pos_quando]
+                pos_quando = pos_quando + 1
+            else:
+                acao = acao + ' ' + palavras[pos_quando]
+                pos_quando = pos_quando + 1
+       
+
+        while pos_entao < len(palavras):
+            if finalidade == '':
+                finalidade = palavras[pos_entao]
+                pos_entao = pos_entao + 1
+            else:
+                finalidade = finalidade + ' ' + palavras[pos_entao]
+                pos_entao = pos_entao + 1
+
+        sentencas.append(preCondicao)
         sentencas.append(acao)
 
         if finalidade != '':
@@ -313,8 +379,10 @@ class UtilsService():
     def extrair_acao(self, tags):
         acao = ''
         for tag in tags:
-            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
-                    acao = tag.palavra
+            if acao == '':
+                acao = tag.palavra
+            else:
+                acao = acao + ' ' + tag.palavra
 
         return acao
 
@@ -331,18 +399,26 @@ class UtilsService():
         return finalidade
 
 
+    def extrair_preCondicao(self, tags):
+        preCondicao = ''
+
+        for tag in tags:
+            if preCondicao == '':
+                preCondicao = tag.palavra
+            else:
+                preCondicao = preCondicao + ' ' + tag.palavra
+
+        return preCondicao
+
+
     
-    def valida_precondicao_cenario(self, tags, sentenca):
-        dado_given = False
+    def valida_precondicao_cenario(self, tags):
         substantivo = False
         pronome = False
         preposicao = False
         artigo = False
         precondicao = ''
         
-        if Constantes.DADO.lower() in sentenca.lower() or Constantes.GIVEN.lower() in sentenca.lower():
-            dado_given = True
-            
         for tag in tags:
             if tag.classe == Constantes.SUBSTANTIVO or tag.classe == Constantes.ARTIGO or tag.classe == Constantes.PRONOME or tag.classe == Constantes.CONJUNCAO or tag.classe == Constantes.PREPOSICAO or tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
                 if precondicao == '':
@@ -359,7 +435,7 @@ class UtilsService():
             elif tag.classe == Constantes.ARTIGO:
                 artigo = True
                 
-        if dado_given and substantivo and (pronome or preposicao or artigo):
+        if substantivo and (pronome or preposicao or artigo):
             return precondicao
             
         return Constantes.ERRO_PRECONDICAO_INCONSISTENTE
@@ -432,7 +508,6 @@ class UtilsService():
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
     # e descrição esperada do comportamento deverá ser deixada de lado.
-    # 
     def verifica_C3_historia(self, sentencas_processadas, bem_formada):
 
         if not bem_formada:
@@ -448,23 +523,15 @@ class UtilsService():
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Um cenário é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários e descrição esperada do comportamento deverá ser deixada de lado.
     # É verificado quantas vezes o DADO/QUANDO/ENTÃO é chamado, caso tenha sido chamado mais que uma vez cada, o cenário não é mínimo
-    def verifica_C3_cenario(self, texto, bem_formada):
-        sentencas = utils.separar_sentencas(texto)
-        dado = 0
-        quando = 0
-        entao = 0
+    def verifica_C3_cenario(self, sentencas_processadas, bem_formada):
+        if not bem_formada:
+            return False
 
-        for s in sentencas:
-            if (Constantes.DADO.lower() in s.lower()) or (Constantes.GIVEN.lower() in s.lower()):
-                dado = dado + 1
-            elif (Constantes.QUANDO.lower() in s.lower()) or (Constantes.WHEN.lower() in s.lower()):
-                quando = quando + 1
-            elif (Constantes.ENTAO.lower() in s.lower()) or (Constantes.THEN.lower() in s.lower()):
-                entao = entao + 1
-
-        minima = dado == 1 and quando == 1 and entao == 1
-
-        return bem_formada and minima and len(sentencas) >= 3
+        for s in sentencas_processadas:
+            if len(s) > 25:
+                return False        
+        
+        return True
 
 
     def retorna_erro_historia(self, historia, tecnologia, erro, tempo):

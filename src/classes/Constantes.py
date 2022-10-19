@@ -33,7 +33,11 @@ PTBR = 'ptbr'
 
 # Mensagens de erro
 ERRO_ATOR_INEXISTENTE = 'Ator inexistente. Não foi encontrado as palavras chaves para validação do ator: Eu como/I as ou Como/As.'
+ERRO_PRECONDICAO_INEXISTENTE = 'Pré-condição inexistente. Não foi encontrado a palavra chave para validação do pré-condição: Dado/Given'
 ERRO_ACAO_INEXISTENTE = 'Ação inexistente. Não foi encontrado a palavra chave para validação da ação: gostaria/would'
+ERRO_ACAO_INEXISTENTE_CENARIO = 'Ação inexistente. Não foi encontrado a palavra chave para validação da ação: quando/when'
+ERRO_FINALIDADE_INEXISTENTE_CENARIO = 'Finalidade inexistente. Não foi encontrado a palavra chave para validação da finalidade: então/then'
+ERRO_ORDENACAO_CENARIO = 'Inconsistência no template de cenário. Ordem das palavras-chave incorretas: Dado/quando/então ou Given/when/then'
 ERRO_ATOR_INCONSISTENTE = 'Inconsistência no template de validação do ator.'
 ERRO_ATOR_INCONSISTENTE_COM_ACAO = 'Inconsistência no template de validação do ator. Sentença do ator não pode conter verbo'
 ERRO_ACAO_INCONSISTENTE = 'Inconsistência no template de validação da ação.'
