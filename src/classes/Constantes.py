@@ -32,7 +32,7 @@ EN = 'en'
 PTBR = 'ptbr'
 
 # Mensagens de erro
-ERRO_ATOR_INEXISTENTE = 'Ator inexistente. Não foi encontrado as palavras chaves para validação do ator: Eu como/I as ou Como/As'
+ERRO_ATOR_INEXISTENTE = 'Ator inexistente. Não foi encontrado as palavras chaves para validação do ator: Eu como/I as ou Como/As.'
 ERRO_ACAO_INEXISTENTE = 'Ação inexistente. Não foi encontrado a palavra chave para validação da ação: gostaria/would'
 ERRO_ATOR_INCONSISTENTE = 'Inconsistência no template de validação do ator.'
 ERRO_ATOR_INCONSISTENTE_COM_ACAO = 'Inconsistência no template de validação do ator. Sentença do ator não pode conter verbo'

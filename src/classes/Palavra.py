@@ -6,6 +6,9 @@ class Palavra():
         
     def __str__(self):
         return 'Palavra: ' + self.palavra + ', Tagset original: ' + self.tagset + ', classe gramatical: ' + self.classe
+
+    def retorna_estrutura(self):
+        return self.palavra + ' --> ' + self.tagset + ' --> ' + self.classe
     
     @property
     def palavra(self):

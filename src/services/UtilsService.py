@@ -475,10 +475,10 @@ class UtilsService():
 
 
     def retorna_erro_historia(self, historia, tecnologia, erro, tempo):
-        return ResponseHistoria(historia, tecnologia, tempo, False, False, False, None, None, None, erro)
+        return ResponseHistoria(historia, tecnologia, tempo, False, False, False, None, None, None, None, erro)
 
     def retorna_erro_cenario(self, cenario, tecnologia, erro, tempo):
-        return ResponseHistoria(cenario, tecnologia, tempo, False, False, False, None, None, None, erro)  
+        return ResponseHistoria(cenario, tecnologia, tempo, False, False, False, None, None, None, None, erro)  
 
 
 utils = UtilsService()

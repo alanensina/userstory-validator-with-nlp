@@ -30,6 +30,11 @@ class NLTKService():
                 sentencas_processadas.append(NLTKService.processar(sentencas[x], idioma))
                 x = x + 1
 
+            tags = []
+            for sp in sentencas_processadas:
+                for s in sp:
+                    tags.append(s.retorna_estrutura())
+
             bem_formada = NLTKService.verifica_C1_historia(sentencas_processadas)
             atomica = NLTKService.verifica_C2_historia(sentencas_processadas)
             minima = utils.verifica_C3_historia(sentencas_processadas, bem_formada)
@@ -46,9 +51,9 @@ class NLTKService():
             tempo = utils.formatar_tempo(start, end)
 
             if erros == None:
-                return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+                return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, tags, erros)
             else:
-                return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, None, None, None, erros)
+                return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, None, None, None, tags, erros)
         else:
             end = timeit.default_timer()  
             tempo = utils.formatar_tempo(start, end)

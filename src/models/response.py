@@ -11,8 +11,10 @@ response_historia = server.api.model('Response História', {
     'ator': fields.String(description='Ator que desempenha a ação na história'),
     'acao': fields.String(description='Ação realizada pelo ator'),
     'finalidade': fields.String(description='Finalidade da ação. É opcional.'),
+    'tags': fields.List(fields.String(description = 'Tags utilizadas')),
     'erros': fields.String(description='Possíveis erros encontrados')
 })
+#fields.List(fields.String(example="user1")))
 
 response_cenario = server.api.model('Response Cenário', {
     'texto': fields.String(description='Texto processado'),
