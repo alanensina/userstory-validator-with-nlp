@@ -1,5 +1,6 @@
 from src.classes import Constantes
 from src.classes.Palavra import Palavra
+from src.classes.ResponseHistoria import ResponseHistoria
 
 class UtilsService():
 
@@ -117,8 +118,82 @@ class UtilsService():
 
     
     def separar_sentencas(self, texto):
-        return texto.split(',')  
-    
+        return texto.split(',')
+
+    # As histórias devem ter suas sentenças separadas através de palavras-chave para que cada sentença seja avaliada independentemente
+    # Palavras-chave:
+    # Eu como, Como -> primeira sentença, identificará o ator
+    # gostaria -> segunda sentença, identificará a ação
+    # para que, para -> terceira sentença, identificará a finalidade
+    def separar_sentencas_historia(self, texto):
+        sentencas = []
+        palavras = texto.split()
+
+        pos_eu = -1
+        pos_como = -1
+        pos_gostaria = -1
+        pos_para = -1
+
+        for p in palavras:
+            if (p.lower() == 'eu' or  p == 'I') and pos_eu == -1:
+                pos_eu = palavras.index(p)
+            elif (p.lower() == 'como' or p.lower() == 'as') and pos_como == -1:
+                pos_como = palavras.index(p)
+            elif (p.lower() == 'gostaria' or p.lower() == 'would') and pos_gostaria == -1:
+                pos_gostaria = palavras.index(p)
+            elif (p.lower() == 'para' or p.lower() == 'so') and pos_para == -1:
+                pos_para = palavras.index(p)
+
+        ator = ''
+        acao = ''
+        finalidade = ''
+
+        if pos_eu == -1 and pos_como == -1:
+            return Constantes.ERRO_ATOR_INCONSISTENTE
+
+        if pos_gostaria == -1:
+            return Constantes.ERRO_ACAO_INCONSISTENTE
+
+        for x in range(pos_gostaria):
+            if ator == '':
+                ator = palavras[x]
+            else:
+                ator = ator + ' ' + palavras[x]
+
+        if pos_para > -1:
+            while pos_gostaria < pos_para:
+                if acao == '':
+                    acao = palavras[pos_gostaria]
+                    pos_gostaria = pos_gostaria + 1
+                else:
+                    acao = acao + ' ' + palavras[pos_gostaria]
+                    pos_gostaria = pos_gostaria + 1
+        else:
+            while pos_gostaria < len(palavras):
+                if acao == '':
+                    acao = palavras[pos_gostaria]
+                    pos_gostaria = pos_gostaria + 1
+                else:
+                    acao = acao + ' ' + palavras[pos_gostaria]
+                    pos_gostaria = pos_gostaria + 1
+
+        if pos_para > -1:
+            while pos_para < len(palavras):
+                if finalidade == '':
+                    finalidade = palavras[pos_para]
+                    pos_para = pos_para + 1
+                else:
+                    finalidade = finalidade + ' ' + palavras[pos_para]
+                    pos_para = pos_para + 1
+
+        sentencas.append(ator)
+        sentencas.append(acao)
+
+        if finalidade != '':
+            sentencas.append(finalidade)
+
+        return sentencas
+
     
     def formatar_tempo(self, start, end):
         return round(end - start, 5).__str__().replace('.',',') + ' segundos'
@@ -317,9 +392,7 @@ class UtilsService():
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
     # e descrição esperada do comportamento deverá ser deixada de lado.
-    def verifica_C3_historia(self, texto, bem_formada):
-        sentencas = UtilsService.separar_sentencas(self, texto)
-        
+    def verifica_C3_historia(self, sentencas, bem_formada):
         if bem_formada and len(sentencas) <= 3:
             return True
         
@@ -345,7 +418,14 @@ class UtilsService():
 
         minima = dado == 1 and quando == 1 and entao == 1
 
-        return bem_formada and minima and len(sentencas) >= 3 
+        return bem_formada and minima and len(sentencas) >= 3
+
+
+    def retorna_erro_historia(self, historia, tecnologia, erro):
+        return ResponseHistoria(historia, tecnologia, None, False, False, False, None, None, None, erro)
+
+    def retorna_erro_cenario(self, cenario, tecnologia, erro):
+        return ResponseHistoria(cenario, tecnologia, None, False, False, False, None, None, None, erro)  
 
 
 utils = UtilsService()

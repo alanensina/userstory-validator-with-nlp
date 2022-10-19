@@ -1,26 +1,26 @@
 [
     {
         "idioma": "ptbr",
-        "historia": "Eu como vendedor, gostaria de cadastrar meus produtos, para que eu possa listá-los posteriormente."
+        "historia": "Eu como vendedor gostaria de cadastrar meus produtos para que eu possa listá-los posteriormente."
     },
     {
         "idioma": "ptbr",
-        "historia": "Eu como analista de vendas, gostaria de listar minhas vendas."
+        "historia": "Eu como analista de vendas gostaria de listar minhas vendas."
     },
     {
         "idioma": "ptbr",
-        "historia": "Eu como advogado, gostaria de listar meus processos, para que eu possa verificar quais estão em andamento."
+        "historia": "Eu como advogado gostaria de listar meus processos para que eu possa verificar quais estão em andamento."
     },
     {
         "idioma": "en",
-        "historia": "As a seller, I would like to register my products, so I can list them later."
+        "historia": "As a seller I would like to register my products so I can list them later."
     },
     {
         "idioma": "en",
-        "historia": "I as a sales analyst, I would like to list my sales."
+        "historia": "I as a sales analyst I would like to list my sales."
     },
     {
         "idioma": "en",
-        "historia": "I as a lawyer, I would like to list my cases, so I can check which ones are in progress."
+        "historia": "I as a lawyer I would like to list my cases so I can check which ones are in progress."
     }
 ]
