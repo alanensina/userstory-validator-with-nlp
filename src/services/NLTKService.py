@@ -17,30 +17,42 @@ class NLTKService():
     def processarHistoria(idioma:str, historia:str):
         start = timeit.default_timer()
         finalidade = None
+        erros = None
 
         sentencas = utils.separar_sentencas_historia(historia)
         
-        if len(sentencas) > 1:
-            bem_formada = NLTKService.verifica_C1_historia(sentencas, idioma)
-            atomica = NLTKService.verifica_C2_historia(sentencas, idioma)
-            minima = utils.verifica_C3_historia(sentencas, bem_formada)
-            ator = NLTKService.retorna_ator_historia(sentencas[0], idioma)    
-            acao = NLTKService.retorna_acao_historia(sentencas[1], idioma)
+        sentencas_processadas = []
+        
+        if len(sentencas) > 1 and not utils.verifica_erro_separacao(sentencas):
+            x = 0
+
+            while x < len(sentencas):
+                sentencas_processadas.append(NLTKService.processar(sentencas[x], idioma))
+                x = x + 1
+
+            bem_formada = NLTKService.verifica_C1_historia(sentencas_processadas)
+            atomica = NLTKService.verifica_C2_historia(sentencas_processadas)
+            minima = utils.verifica_C3_historia(sentencas_processadas, bem_formada)
+            ator = utils.extrair_ator(sentencas_processadas[0])    
+            acao = utils.extrair_acao(sentencas_processadas[1])
+
             if len(sentencas) > 2:      
-                finalidade = NLTKService.retorna_finalidade_historia(sentencas[2], idioma)  
-            erros = utils.verifica_erros_historia(bem_formada, atomica, minima, ator, acao, finalidade)
+                finalidade = utils.extrair_finalidade(sentencas_processadas[2])  
+                erros = utils.verifica_erros_historia(bem_formada, atomica, minima, utils.valida_ator_historia(sentencas_processadas[0]), utils.valida_acao_historia(sentencas_processadas[1]), utils.valida_finalidade_historia(sentencas_processadas[2]))
+            else:
+                erros = utils.verifica_erros_historia(bem_formada, atomica, minima, utils.valida_ator_historia(sentencas_processadas[0]), utils.valida_acao_historia(sentencas_processadas[1]), None)
+                
             end = timeit.default_timer()  
             tempo = utils.formatar_tempo(start, end)
 
             if erros == None:
                 return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
             else:
-                ator = utils.limpar_mensagem_de_erro(ator)
-                acao = utils.limpar_mensagem_de_erro(acao)   
-                finalidade = utils.limpar_mensagem_de_erro(finalidade)
-                return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, ator, acao, finalidade, erros)
+                return ResponseHistoria(historia, Constantes.NLTK, tempo, bem_formada, atomica, minima, None, None, None, erros)
         else:
-            return utils.retorna_erro_historia(historia, Constantes.NLTK, sentencas[0])  
+            end = timeit.default_timer()  
+            tempo = utils.formatar_tempo(start, end)
+            return utils.retorna_erro_historia(historia, Constantes.NLTK, sentencas, tempo)  
            
         
     def processarCenario(idioma:str, cenario:str):
@@ -127,15 +139,15 @@ class NLTKService():
     # Verbo -> Verbo
     # Objeto indireto (opcional) -> Substantivo ou pronome
     # Objeto direto -> Substantivo ou pronome
-    def verifica_C1_historia(sentencas, idioma):
-        if len(sentencas) < 2:
+    def verifica_C1_historia(sentencas_processadas):
+        if len(sentencas_processadas) < 2:
             return False
         
         finalidade = None
-        ator = NLTKService.retorna_ator_historia(sentencas[0], idioma)
-        acao = NLTKService.retorna_acao_historia(sentencas[1], idioma)
-        if len(sentencas) > 2:
-            finalidade =  NLTKService.retorna_finalidade_historia(sentencas[2], idioma)
+        ator = NLTKService.retorna_ator_historia(sentencas_processadas[0])
+        acao = NLTKService.retorna_acao_historia(sentencas_processadas[1])
+        if len(sentencas_processadas) > 2:
+            finalidade =  NLTKService.retorna_finalidade_historia(sentencas_processadas[2])
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return True
@@ -163,14 +175,14 @@ class NLTKService():
     # Uma história é atômica quando há apenas um objetivo na tarefa
     # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a segunda sentença possui menos que 3 verbos
     # Caso a sentença não se enquadre no templete de ação, a história de usuário não será atômica
-    def verifica_C2_historia(sentencas, idioma):
+    def verifica_C2_historia(sentencas_processadas):
         verbos = 0
 
-        if len(sentencas) < 2:
+        if len(sentencas_processadas) < 2:
             return False
 
         # Processa a sentença destinada a ação (2ª sentença)
-        tags = NLTKService.processar(sentencas[1], idioma)
+        tags = sentencas_processadas[1]
 
         for tag in tags:
             if tag.classe == Constantes.VERBO and tag.palavra != 'would':
@@ -210,8 +222,7 @@ class NLTKService():
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # o ator deverá ser identificado na primeira sentença
-    def retorna_ator_historia(sentenca, idioma):
-        tags = NLTKService.processar(sentenca, idioma)        
+    def retorna_ator_historia(tags):
         return utils.valida_ator_historia(tags)
 
         
@@ -226,8 +237,7 @@ class NLTKService():
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a ação deverá ser identificado na segunda sentença
-    def retorna_acao_historia(sentenca, idioma):
-        tags = NLTKService.processar(sentenca, idioma)
+    def retorna_acao_historia(tags):
         return utils.valida_acao_historia(tags)
 
         
@@ -294,8 +304,7 @@ class NLTKService():
     
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
     # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
-    def retorna_finalidade_historia(sentenca, idioma):
-            tags = NLTKService.processar(sentenca, idioma)
+    def retorna_finalidade_historia(tags):
             return utils.valida_finalidade_historia(tags)
    
     # Conforme o layout de cenário (Dado/Quando/Então), a finalidade deverá ser identificada em uma sentença posterior a sentença do ator e da ação

@@ -1,26 +1,26 @@
 [
   {
     "idioma": "ptbr",
-    "historia": "Como vendedor, quero de cadastrar"
+    "historia": "Como vendedor gostaria de cadastrar"
   },
   {
     "idioma": "en",
-    "historia": "As a seller, I want register"
+    "historia": "As a seller I want register"
   },
   {
     "idioma": "ptbr",
-    "historia": "Eu como vendedor, gostaria de cadastrar meus produtos e listar na mesma tela."
+    "historia": "Eu como vendedor gostaria de cadastrar meus produtos e listar na mesma tela."
   },
   {
     "idioma": "en",
-    "historia": "As a seller, I would like to register my products and list them on the same screen."
+    "historia": "As a seller I would like to register my products and list them on the same screen."
   },
   {
     "idioma": "ptbr",
-    "historia": "Eu como advogado, gostaria de listar meus processos, para que eu possa verificar quais estão em andamento, quais estão finalizados e quais não foram iniciados."
+    "historia": "Eu como advogado gostaria de listar meus processos para que eu possa verificar quais estão em andamento quais estão finalizados e quais não foram iniciados."
   },
   {
     "idioma": "en",
-    "historia": "As a lawyer, I would like to list my processes, so that I can check which ones are in progress, which ones are finalized and which one have not started."
+    "historia": "As a lawyer I would like to list my processes so that I can check which ones are in progress which ones are finalized and which one have not started."
   }
 ]

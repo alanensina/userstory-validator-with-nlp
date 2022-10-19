@@ -120,6 +120,9 @@ class UtilsService():
     def separar_sentencas(self, texto):
         return texto.split(',')
 
+    def verifica_erro_separacao(self, erro):
+        return erro == Constantes.ERRO_ATOR_INEXISTENTE or erro == Constantes.ERRO_ACAO_INEXISTENTE
+
     # As histórias devem ter suas sentenças separadas através de palavras-chave para que cada sentença seja avaliada independentemente
     # Palavras-chave:
     # Eu como, Como -> primeira sentença, identificará o ator
@@ -149,10 +152,13 @@ class UtilsService():
         finalidade = ''
 
         if pos_eu == -1 and pos_como == -1:
-            return Constantes.ERRO_ATOR_INCONSISTENTE
+            return Constantes.ERRO_ATOR_INEXISTENTE
+
+        if pos_eu != -1 and pos_como == -1:
+            return Constantes.ERRO_ATOR_INEXISTENTE
 
         if pos_gostaria == -1:
-            return Constantes.ERRO_ACAO_INCONSISTENTE
+            return Constantes.ERRO_ACAO_INEXISTENTE
 
         for x in range(pos_gostaria):
             if ator == '':
@@ -223,18 +229,20 @@ class UtilsService():
     def verifica_erros_historia(self, bem_formada, atomica, minima, ator, acao, finalidade):
         erros = ''
         if not bem_formada:
-            erros = 'A história não atende o primeiro critério de qualidade que é Bem formada. '
+            erros = 'A história não é Bem formada. '
         if not atomica:
-            erros = erros + 'A história não atende o segundo critério de qualidade que é Atômica. '
+            erros = erros + 'A história não é Atômica. '
         if not minima:
-            erros = erros + 'A história não atende o terceiro critério de qualidade que é Mínima. '
+            erros = erros + 'A história não é Mínima. '
+        if ator == Constantes.ERRO_ATOR_INCONSISTENTE_COM_ACAO:
+            erros = erros + Constantes.ERRO_ATOR_INCONSISTENTE_COM_ACAO + ' '
         if ator == Constantes.ERRO_ATOR_INCONSISTENTE:
             erros = erros + Constantes.ERRO_ATOR_INCONSISTENTE + ' '
         if acao == Constantes.ERRO_ACAO_INCONSISTENTE:
             erros = erros + Constantes.ERRO_ACAO_INCONSISTENTE + ' '
         if finalidade == Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             erros = erros + Constantes.ERRO_FINALIDADE_INCONSISTENTE + ' '
-        if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
+        if bem_formada and atomica and minima and ator != Constantes.ERRO_ATOR_INCONSISTENTE and ator != Constantes.ERRO_ATOR_INCONSISTENTE_COM_ACAO  and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return None
         
         return erros
@@ -243,11 +251,11 @@ class UtilsService():
     def verifica_erros_cenario(self, bem_formada, atomica, minima, precondicao, acao, finalidade):
         erros = ''
         if not bem_formada:
-            erros = 'O cenário não atende ao primeiro critério de qualidade que é Bem formada. '
+            erros = 'O cenário não é Bem formada. '
         if not atomica:
-            erros = erros + 'O cenário não atende ao segundo critério de qualidade que é Atômica. '
+            erros = erros + 'O cenário não é Atômica. '
         if not minima:
-            erros = erros + 'O cenário não atende ao terceiro critério de qualidade que é Mínima. '
+            erros = erros + 'O cenário não é Mínima. '
         if precondicao == Constantes.ERRO_PRECONDICAO_INCONSISTENTE:
             erros = erros + Constantes.ERRO_PRECONDICAO_INCONSISTENTE + ' '
         if acao == Constantes.ERRO_ACAO_INCONSISTENTE_2:
@@ -268,6 +276,7 @@ class UtilsService():
         pronome = False
         preposicao = False
         artigo = False
+        verbo = False
         ator = ''
 
         for tag in tags:
@@ -285,11 +294,49 @@ class UtilsService():
                 preposicao = True
             elif tag.classe == Constantes.ARTIGO:
                 artigo = True
-                    
-        if substantivo and (pronome or preposicao or artigo):
+            elif tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
+                verbo = True
+
+        if verbo:
+            return Constantes.ERRO_ATOR_INCONSISTENTE_COM_ACAO           
+        elif substantivo and (pronome or preposicao or artigo):
             return ator
         else:
             return Constantes.ERRO_ATOR_INCONSISTENTE
+
+
+    def extrair_ator(self, tags):
+        atores = ''
+        for tag in tags:
+            if tag.classe == Constantes.SUBSTANTIVO:
+                if atores == '':
+                    atores = tag.palavra
+                else:
+                    atores = atores + ', ' + tag.palavra
+        
+        return atores
+
+    
+    def extrair_acao(self, tags):
+        acao = ''
+        for tag in tags:
+            if tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX:
+                    acao = tag.palavra
+
+        return acao
+
+
+    def extrair_finalidade(self, tags):
+        finalidade = ''
+
+        for tag in tags:
+            if finalidade == '':
+                finalidade = tag.palavra
+            else:
+                finalidade = finalidade + ' ' + tag.palavra
+
+        return finalidade
+
 
     
     def valida_precondicao_cenario(self, tags, sentenca):
@@ -392,11 +439,17 @@ class UtilsService():
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
     # e descrição esperada do comportamento deverá ser deixada de lado.
-    def verifica_C3_historia(self, sentencas, bem_formada):
-        if bem_formada and len(sentencas) <= 3:
-            return True
+    # 
+    def verifica_C3_historia(self, sentencas_processadas, bem_formada):
+
+        if not bem_formada:
+            return False
+
+        for s in sentencas_processadas:
+            if len(s) > 10:
+                return False        
         
-        return False
+        return True
 
     
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
@@ -421,11 +474,11 @@ class UtilsService():
         return bem_formada and minima and len(sentencas) >= 3
 
 
-    def retorna_erro_historia(self, historia, tecnologia, erro):
-        return ResponseHistoria(historia, tecnologia, None, False, False, False, None, None, None, erro)
+    def retorna_erro_historia(self, historia, tecnologia, erro, tempo):
+        return ResponseHistoria(historia, tecnologia, tempo, False, False, False, None, None, None, erro)
 
-    def retorna_erro_cenario(self, cenario, tecnologia, erro):
-        return ResponseHistoria(cenario, tecnologia, None, False, False, False, None, None, None, erro)  
+    def retorna_erro_cenario(self, cenario, tecnologia, erro, tempo):
+        return ResponseHistoria(cenario, tecnologia, tempo, False, False, False, None, None, None, erro)  
 
 
 utils = UtilsService()
