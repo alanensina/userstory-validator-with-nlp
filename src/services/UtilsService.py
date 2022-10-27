@@ -126,6 +126,7 @@ class UtilsService():
         pos_como = -1
         pos_gostaria = -1
         pos_para = -1
+        pos_que = -1
 
         for p in palavras:
             if (p.lower() == 'eu' or  p == 'I') and pos_eu == -1:
@@ -136,6 +137,8 @@ class UtilsService():
                 pos_gostaria = palavras.index(p)
             elif (p.lower() == 'para' or p.lower() == 'so') and pos_para == -1:
                 pos_para = palavras.index(p)
+            elif (p.lower() == 'que' or p.lower() == 'that') and pos_que == -1 and ((pos_para + 1) == palavras.index(p)):
+                pos_que = palavras.index(p)
 
         ator = ''
         acao = ''
@@ -156,7 +159,7 @@ class UtilsService():
             else:
                 ator = ator + ' ' + palavras[x]
 
-        if pos_para > -1:
+        if pos_para > -1 and ((pos_para + 1) == pos_que):
             while pos_gostaria < pos_para:
                 if acao == '':
                     acao = palavras[pos_gostaria]
@@ -173,7 +176,7 @@ class UtilsService():
                     acao = acao + ' ' + palavras[pos_gostaria]
                     pos_gostaria = pos_gostaria + 1
 
-        if pos_para > -1:
+        if pos_para > -1 and ((pos_para + 1) == pos_que):
             while pos_para < len(palavras):
                 if finalidade == '':
                     finalidade = palavras[pos_para]
@@ -445,7 +448,7 @@ class UtilsService():
             elif tag.classe == Constantes.ADVERBIO:
                 adverbio = True
             
-        if verbo and substantivo and pronome and (preposicao or adverbio):        
+        if verbo and substantivo and (preposicao or adverbio or pronome):        
             return acao
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE

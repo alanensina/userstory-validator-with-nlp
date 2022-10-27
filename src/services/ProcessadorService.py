@@ -16,11 +16,11 @@ class ProcessadorService():
             if type == 'historia':
                 historia = p.get('historia')
                 response.append(NLTKService.processarHistoria(idioma, historia))
-                response.append(SpacyService.processarHistoria(idioma, historia))
+                #response.append(SpacyService.processarHistoria(idioma, historia))
             elif type == 'cenario':
                 cenario = p.get('cenario')
                 response.append(NLTKService.processarCenario(idioma, cenario))
-                response.append(SpacyService.processarCenario(idioma, cenario))
+                #response.append(SpacyService.processarCenario(idioma, cenario))
                 
         return response
 
