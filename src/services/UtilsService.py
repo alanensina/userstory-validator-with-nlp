@@ -489,14 +489,22 @@ class UtilsService():
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
     # e descrição esperada do comportamento deverá ser deixada de lado.
+    # Caso haja algum caracter inválido (Constantes.CARACTERES_INVALIDOS) significa que foi feito alguma nota adicional e violou a minimalidade
     def verifica_C3_historia(self, sentencas_processadas, bem_formada):
 
         if not bem_formada:
             return False
+        
+        chars = []
 
-        for s in sentencas_processadas:
-            if len(s) > 10:
-                return False        
+        for sentenca in sentencas_processadas:
+            for tag in sentenca:
+                for palavra in tag.palavra:
+                    chars.append(palavra)                
+        
+        for char in chars:
+            if utils.possui_carcater_invalido(char):
+                return False
         
         return True
 
@@ -568,6 +576,7 @@ class UtilsService():
     # Caso a sentença não se enquadre no templete de ação, a história de usuário não será atômica
     def verifica_C2_historia(self, sentencas_processadas):
         verbos = 0
+        possui_conjuncao = False
 
         if len(sentencas_processadas) < 2:
             return False
@@ -575,10 +584,14 @@ class UtilsService():
         tags = sentencas_processadas[1]
 
         for tag in tags:
+            
+            if not possui_conjuncao:
+                possui_conjuncao = utils.possui_conjuncao(tag.palavra)            
+            
             if tag.classe == Constantes.VERBO and tag.palavra != 'would':
                 verbos = verbos + 1
             
-        return verbos < 3
+        return verbos < 3 and not possui_conjuncao
 
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Um cenário é atômico quando o número de ações seja maior que zero e seja igual ao número de condicionais
@@ -690,6 +703,13 @@ class UtilsService():
             return finalidade
         
         return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2
-
+    
+    # Função responsável para validar se há conjunções na validação do critério de qualidade 2 (Atômica)
+    def possui_conjuncao(self, palavra):
+        return Constantes.CONJUNCOES_C2.__contains__(palavra.lower())
+    
+    # Função responsável para validar se há caracter inválido na validação do critério de qualidade 3 (Mínima)
+    def possui_carcater_invalido(self, caracter):
+        return Constantes.CARACTERES_INVALIDOS.__contains__(caracter)
 
 utils = UtilsService()

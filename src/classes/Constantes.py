@@ -31,6 +31,12 @@ SPACY_PT = 'pt_core_news_sm'
 EN = 'en'
 PTBR = 'ptbr'
 
+# Conjunções utilizadas para validação do Critério de Qualidade 2
+CONJUNCOES_C2 = ['e', 'and', 'ou', 'or']
+
+# Caracteres inválidos para validação do Critério de Qualidade 3
+CARACTERES_INVALIDOS = ['*', '[', ']', '(', ')', '{', '}', '_', ':']
+
 # Mensagens de erro
 ERRO_ATOR_INEXISTENTE = 'Ator inexistente. Não foi encontrado as palavras chaves para validação do ator: Eu como/I as ou Como/As.'
 ERRO_PRECONDICAO_INEXISTENTE = 'Pré-condição inexistente. Não foi encontrado a palavra chave para validação do pré-condição: Dado/Given'
