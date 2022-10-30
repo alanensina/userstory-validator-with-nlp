@@ -511,14 +511,21 @@ class UtilsService():
     
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Um cenário é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários e descrição esperada do comportamento deverá ser deixada de lado.
-    # É verificado quantas vezes o DADO/QUANDO/ENTÃO é chamado, caso tenha sido chamado mais que uma vez cada, o cenário não é mínimo
+     # Caso haja algum caracter inválido (Constantes.CARACTERES_INVALIDOS) significa que foi feito alguma nota adicional e violou a minimalidade
     def verifica_C3_cenario(self, sentencas_processadas, bem_formada):
         if not bem_formada:
             return False
 
-        for s in sentencas_processadas:
-            if len(s) > 25:
-                return False        
+        chars = []
+
+        for sentenca in sentencas_processadas:
+            for tag in sentenca:
+                for palavra in tag.palavra:
+                    chars.append(palavra)                
+        
+        for char in chars:
+            if utils.possui_carcater_invalido(char):
+                return False
         
         return True
 
