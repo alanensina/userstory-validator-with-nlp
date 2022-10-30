@@ -579,26 +579,18 @@ class UtilsService():
     
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Uma história é atômica quando há apenas um objetivo na tarefa
-    # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a segunda sentença possui menos que 3 verbos
-    # Caso a sentença não se enquadre no templete de ação, a história de usuário não será atômica
+    # Para validar se a história de usuário é atômica, as sentenças são separadas e em seguida é verificado se a segunda sentença possui alguma conjunção (Constantes.CONJUNCOES_C2)
     def verifica_C2_historia(self, sentencas_processadas):
-        verbos = 0
-        possui_conjuncao = False
-
         if len(sentencas_processadas) < 2:
             return False
 
         tags = sentencas_processadas[1]
 
         for tag in tags:
+            if utils.possui_conjuncao(tag.palavra):
+                return False          
             
-            if not possui_conjuncao:
-                possui_conjuncao = utils.possui_conjuncao(tag.palavra)            
-            
-            if tag.classe == Constantes.VERBO and tag.palavra != 'would':
-                verbos = verbos + 1
-            
-        return verbos < 3 and not possui_conjuncao
+        return True
 
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Um cenário é atômico quando o número de ações seja maior que zero e seja igual ao número de condicionais
