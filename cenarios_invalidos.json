@@ -1,26 +1,82 @@
 [
-  {
-      "idioma": "ptbr",
-      "cenario": "Dado que o cliente deseja abrir uma conta, então uma nova conta deve ser criada."
-  },
-  {
-      "idioma": "ptbr",
-      "cenario": "Dado que o usuário deseja listar seus pedidos, e ele esteja logado, quando ele clicar no botão listar pedidos e selecionar um período de listagem, então uma lista de pedidos deverá ser exibida."
-  },
-  {
-      "idioma": "ptbr",
-      "cenario": "Dado que o comprador deseja realizar uma compra, quando ele clicar no botão comprar, e quando ele selecionar um período, então um novo pedido deverá ser criado."
-  },
-  {
-      "idioma": "en",
-      "cenario": "Given a customer wants to open an account, then a new account must be created."
-  },
-  {
-      "idioma": "en",
-      "cenario": "Given that the user wants to list his orders, and he is logged, when he clicks the list orders button and select a period to list, then a list of orders should be displayed."
-  },
-  {
-      "idioma": "en",
-      "cenario": "Given that the buyer wants to make a new order, and has added all items to the order, when he clicks on the buy button, and when he select a period, then a new order must be created."
-  }
+    {
+        "idioma": "ptbr",
+        "cenario": "Quando o cliente desejar abrir uma conta, quando entrar com essas informações no cadastro, então uma nova conta deve ser criada."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que o usuário deseja listar seus pedidos, e ele esteja logado, se ele clicar no botão listar pedidos, então uma lista de pedidos deverá ser exibida."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que o comprador deseja realizar uma compra, e adicionou os itens ao pedido, quando ele clicar no botão comprar, um novo pedido deverá ser criado."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado o corretor deseja listar, quando ele clicar então uma lista deve ser exibida."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que uma pessoa deseja se cadastrar no site, quando ela clicar no botão novo usuário e quando ela preencher seus dados, então uma nova tela será exibida para ela inserir seus dados de cadastro."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que um motorista de aplicativo deseja iniciar uma corrida, quando uma nova notificação de corrida aparecer na tela e o motorista clicar em aceitar, então a localização para coleta do passageiro será exibida no GPS do aplicativo. Obs*: Apenas logado"
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que um cozinheiro deseja listar as receitas no site, quando ele clicar no botão Receitas e quando estiver logado, então uma lista de receitas em ordem alfabética deverá ser exibida."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que um aluno deseja visualizar suas notas e ele esteja logado, quando ele clicar em seu perfil e quando clicar no botão Notas, então suas notas deverão ser exibidas."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que o usuário deseja buscar os restaurantes mais próximos da sua localização, quando ele clicar no ícone restaurantes, então um mapa de sua localização deverá ser exibida com os restaurantes (apenas restaurantes que patrocinam o aplicativo) mais próximos."
+    },
+    {
+        "idioma": "ptbr",
+        "cenario": "Dado que o advogado deseja visualizar o status dos seus processos e ele esteja logado, quando ele clicar no botão Meus Processos então uma lista dos seus processos deverão ser exibidas em ordem decrescente do mais novo para o mais antigo juntamente do seu status. [Apenas na versão premium]"
+    },
+    {
+        "idioma": "en",
+        "cenario": "When the customer wants to open an account, when he enters this information in the register, then a new account must be created."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given that the user wants to list his orders, and he is logged in, if he clicks the list orders button, then a list of orders should be displayed."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given the buyer wants to make a purchase, and has added the items to the order, when he clicks the buy button, a new order must be created."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given the broker wants to list, when he clicks then a list should be displayed."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given a person wants to register on the site, when he clicks on the new user button and when he fills in his data, then a new screen will be displayed for him to enter his registration data."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given an app driver wants to start a ride, when a new ride notification appears on the screen and the driver clicks accept, then the location for passenger pickup will be displayed on the app's GPS. Note*: Only Logged"
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given that a cook wants to list recipes on the website, when he clicks the Recipes button and when he is logged in, then a list of recipes in alphabetical order should be displayed."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given that a student wants to view his grades and he is logged in, when he clicks on your profile and when he clicks the Grades button, then his grades should be displayed."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given the user wants to search for the closest restaurants to his location, when he clicks on the restaurants icon, then a map of his location should be displayed with the closest restaurants (Only restaurants that sponsor the app)."
+    },
+    {
+        "idioma": "en",
+        "cenario": "Given the lawyer wants to view the status of his cases and he is logged in, when he clicks on the My Cases button then a list of his cases should be displayed in descending order from the newest to the oldest along with his status. [Only Premium version]"
+    }
 ]

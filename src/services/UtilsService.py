@@ -593,24 +593,22 @@ class UtilsService():
         return True
 
     # Função responsável para verificar o segundo critério de qualidade: Atômica
-    # Um cenário é atômico quando o número de ações seja maior que zero e seja igual ao número de condicionais
-    #TODO: verificar se esse critério se aplica a cenários
+    # Um cenário é atômico quando há apenas uma ação sendo executada
+    # Como validação, é verificado quantas vezes a palavra-chave quando/when é citada na sentença da ação
+    # Caso seja diferente de 1, o cenário não é atômico
     def verifica_C2_cenario(self, tags):
-        num_acoes = 0
-        num_condicoes = 0
+        
+        if len(tags) <= 1:
+            return False
+        
         sentenca = tags[1] # Tags da sentença da ação
-
+        quando_cont = 0
+        
         for tag in sentenca:
-            if (tag.classe == Constantes.VERBO or tag.classe == Constantes.VERBO_AUX) and tag.palavra != 'would':
-                num_acoes = num_acoes + 1
-
-            elif tag.palavra.lower() == 'e' or tag.palavra.lower() == 'and':
-                num_condicoes = num_condicoes + 1
-
-        if num_condicoes == 0:
-            return num_acoes >= 1
-        else:       
-            return (num_acoes > num_condicoes) and num_acoes != 0
+            if tag.palavra.lower() == 'quando' or tag.palavra.lower() == 'when':
+                quando_cont = quando_cont + 1
+        
+        return quando_cont == 1       
     
         
     # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
