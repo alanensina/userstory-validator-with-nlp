@@ -13,9 +13,9 @@ class Server():
                        description='API voltada para análise de Histórias de Usuário utilizando Processamento de Linguagem Natural. \n Tecnologias utilizadas: NLTK e spaCy',
                        doc='/analisador')
         
+        
     def run(self, ):
-        self.app.run(
-            debug=True
-            )
+        self.app.run(debug=True)
+        
         
 server = Server()

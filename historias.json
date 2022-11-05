@@ -1,0 +1,162 @@
+[
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como vendedor gostaria de cadastrar meus produtos para que eu possa listá-los posteriormente."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como analista de vendas gostaria de listar minhas vendas."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como advogado gostaria de listar meus processos para que eu possa verificar quais estão em andamento."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como corretor eu gostaria de listar os imóveis disponíveis para aluguel."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como usuário eu gostaria de criar um perfil de usuário para que eu possa acessar o site."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como professor gostaria de lançar as notas do aluno no sistema para que eu possa avaliá-lo no futuro."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como motorista de aplicativo, gostaria de avaliar meus clientes após as corridas."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como cozinheiro, gostaria de listar as receitas no aplicativo para que eu possa prepará-las aos meus clientes."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como atleta gostaria de cadastrar minhas atividades físicas para que eu possa acompanhar minha evolução."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como aluno gostaria de listar minhas provas para que eu possa planejar meus estudos."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a seller I would like to register my products so I can list them later."
+    },
+    {
+        "idioma": "en",
+        "historia": "I as a sales analyst I would like to list my sales."
+    },
+    {
+        "idioma": "en",
+        "historia": "I as a lawyer I would like to list my cases so I can check which ones are in progress."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a agent I would like to list the houses available for rent."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a user I would like to create a user profile so that I can access the site."
+    },
+    {
+        "idioma": "en",
+        "historia": "I as a teacher I would like to register the student's grades into the system so that I can evaluate them in the future."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a driver, I would like to rate my customers after the ride."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a cook, I would like to list the recipes in the app so that I can prepare them for my customers."
+    },
+    {
+        "idioma": "en",
+        "historia": "As an athlete, I would like to register my physical activities so that I can check my evolution."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a student I would like to list my exams so I can plan my studies."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como vendedor gostaria de cadastrar."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como vendedor gostaria de cadastrar meus produtos e listar na mesma tela."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como advogado gostaria de listar meus processos para que eu possa verificar quais estão em andamento. Nota: Não exibir os finalizados."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Gostaria de cadastrar meus produtos para que eu possa listá-los posteriormente."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como usuário, gostaria de avaliar e comentar os produtos disponíveis."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Eu como professor, gostaria de avaliar os alunos. [Apenas professores, secretário não.]"
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Sou vendedor e quero cadastrar meus produtos."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como atleta, eu desejo cadastrar minhas atividades."
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como cozinheiro, eu gostaria de listar minhas receitas. (Apenas para usuários cadastrados)"
+    },
+    {
+        "idioma": "ptbr",
+        "historia": "Como corretor eu gostaria de cadastrar os imóveis, listá-los e compartilhá-los em minhas redes sociais."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a seller I would like to register."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a seller I would like to register my products and list them on the same screen."
+    },
+    {
+        "idioma": "en",
+        "historia": "I as a lawyer would like to list my cases so I can check which ones are in progress. Note: Do not display the final ones."
+    },
+    {
+        "idioma": "en",
+        "historia": "I would like to register my products so that I can list them later."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a user, I would like to rate and comment on available products."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a teacher, I would like to evaluate students. [Only teachers, not secretary.]"
+    },
+    {
+        "idioma": "en",
+        "historia": "I am a seller and I want to register my products."
+    },
+    {
+        "idioma": "en",
+        "historia": "As an athlete, I want to register my activities."
+    },
+    {
+        "idioma": "en",
+        "historia": "As a cook, I would like to list my recipes. (Registered users only)"
+    },
+    {
+        "idioma": "en",
+        "historia": "As an agent I would like to register properties, list them and share them on my social networks."
+    }
+]

@@ -6,6 +6,7 @@ class UtilsService():
 
     def __init__(self):
         pass 
+    
 
     def unificar_tagset(self, tags, tecnologia):
         tagsets = []
@@ -19,6 +20,7 @@ class UtilsService():
                 tagsets.append(Palavra(token.text, token.tag_, UtilsService.get_classe_gramatical(token.tag_))) 
 
         return tagsets
+    
 
     # Função responsável em retornar a classe gramatical conforme o tagset
     def get_classe_gramatical(tagset):
@@ -112,12 +114,13 @@ class UtilsService():
 
     def verifica_erro_separacao(self, erro):
         return erro == Constantes.ERRO_ATOR_INEXISTENTE or erro == Constantes.ERRO_ACAO_INEXISTENTE or erro == Constantes.ERRO_PRECONDICAO_INEXISTENTE or erro == Constantes.ERRO_ACAO_INEXISTENTE_CENARIO or erro == Constantes.ERRO_FINALIDADE_INEXISTENTE_CENARIO or erro == Constantes.ERRO_ORDENACAO_CENARIO
+    
 
     # As histórias devem ter suas sentenças separadas através de palavras-chave para que cada sentença seja avaliada independentemente
     # Palavras-chave:
-    # Eu como, Como -> primeira sentença, identificará o ator
-    # gostaria -> segunda sentença, identificará a ação
-    # para que, para -> terceira sentença, identificará a finalidade
+    # Eu como/I as, Como/As -> primeira sentença, identificará o ator
+    # gostaria/would -> segunda sentença, identificará a ação
+    # para que/so that, para/that -> terceira sentença, identificará a finalidade
     def separar_sentencas_historia(self, texto):
         sentencas = []
         palavras = texto.split()
@@ -261,8 +264,9 @@ class UtilsService():
             sentencas.append(finalidade)
 
         return sentencas
-
     
+
+    # Formata o tempo de milissegundos em segundos com 5 casas decimais
     def formatar_tempo(self, start, end):
         return round(end - start, 5).__str__().replace('.',',') + ' segundos'
     
@@ -311,7 +315,10 @@ class UtilsService():
             return None
         
         return erros
+    
 
+    # Valida o ator da história
+    # Para ser um ator válido é necessário um substantivo e um pronome, ou preposição ou artigo
     def valida_ator_historia(self, tags):
         substantivo = False
         pronome = False
@@ -391,8 +398,10 @@ class UtilsService():
                 preCondicao = preCondicao + ' ' + tag.palavra
 
         return preCondicao
-
     
+
+    # Valida o pré-condição do cenário
+    # Para ser uma pré-condição válida é necessário um substantivo e um pronome, ou preposição ou artigo
     def valida_precondicao_cenario(self, tags):
         substantivo = False
         pronome = False
@@ -422,6 +431,8 @@ class UtilsService():
         return Constantes.ERRO_PRECONDICAO_INCONSISTENTE
 
 
+    # Valida a ação da história
+    # Para ser uma ação válida é necessário um verbo, um substantivo e uma preposição ou advérbio ou pronome
     def valida_acao_historia(self, tags):
         acao = ''
         verbo = False
@@ -452,8 +463,10 @@ class UtilsService():
             return acao
         else:
             return Constantes.ERRO_ACAO_INCONSISTENTE
+        
 
-    
+    # Valida a finalidade da história
+    # Para ser uma finalidade válida é necessário um verbo e um substantivo ou preposição ou advérbio ou pronome
     def valida_finalidade_historia(self, tags):
         verbo = False
         substantivo = False
@@ -485,6 +498,7 @@ class UtilsService():
 
         else:
             return Constantes.ERRO_FINALIDADE_INCONSISTENTE
+        
 
     # Função responsável para verificar o terceiro critério de qualidade: Mínima
     # Uma história é mínima quando contém apenas as informações referentes ao critério de qualidade Bem Formada, qualquer informação extra como comentários 
@@ -532,6 +546,7 @@ class UtilsService():
 
     def retorna_erro_historia(self, historia, tecnologia, erro, tempo):
         return ResponseHistoria(historia, tecnologia, tempo, False, False, False, None, None, None, None, erro)
+    
 
     def retorna_erro_cenario(self, cenario, tecnologia, erro, tempo):
         return ResponseHistoria(cenario, tecnologia, tempo, False, False, False, None, None, None, None, erro)  
@@ -552,10 +567,10 @@ class UtilsService():
             return False
         
         finalidade = None
-        ator = utils.retorna_ator_historia(sentencas_processadas[0])
-        acao = utils.retorna_acao_historia(sentencas_processadas[1])
+        ator = utils.valida_ator_historia(sentencas_processadas[0])
+        acao = utils.valida_acao_historia(sentencas_processadas[1])
         if len(sentencas_processadas) > 2:
-            finalidade =  utils.retorna_finalidade_historia(sentencas_processadas[2])
+            finalidade =  utils.valida_finalidade_historia(sentencas_processadas[2])
         
         if ator != Constantes.ERRO_ATOR_INCONSISTENTE and acao != Constantes.ERRO_ACAO_INCONSISTENTE and finalidade != Constantes.ERRO_FINALIDADE_INCONSISTENTE:
             return True
@@ -567,7 +582,7 @@ class UtilsService():
         if len(sentencas_processadas) < 3:
             return False
         
-        precondicao = utils.retorna_precondicao_cenario(sentencas_processadas[0])
+        precondicao = utils.valida_precondicao_cenario(sentencas_processadas[0])
         acao = utils.retorna_acao_cenario(sentencas_processadas[1])
         finalidade =  utils.retorna_finalidade_cenario(sentencas_processadas[2])
         
@@ -592,6 +607,7 @@ class UtilsService():
             
         return True
 
+
     # Função responsável para verificar o segundo critério de qualidade: Atômica
     # Um cenário é atômico quando há apenas uma ação sendo executada
     # Como validação, é verificado quantas vezes a palavra-chave quando/when é citada na sentença da ação
@@ -611,26 +627,9 @@ class UtilsService():
         return quando_cont == 1       
     
         
-    # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
-    # o ator deverá ser identificado na primeira sentença
-    def retorna_ator_historia(self, tags):
-        return utils.valida_ator_historia(tags)
-
-        
-    # Conforme o layout de cenário (Dado/Quando/Então), a pré-condição deverá ser identificado na primeira sentença
-    # A palavra Dado/Given também deve estar presente
-    def retorna_precondicao_cenario(self, tags):
-        return utils.valida_precondicao_cenario(tags)
-       
-        
-    # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
-    # a ação deverá ser identificado na segunda sentença
-    def retorna_acao_historia(self, tags):
-        return utils.valida_acao_historia(tags)
-
-        
     # Conforme o layout de cenário (Dado/Quando/Então), a ação deverá ser identificada em uma sentença posterior a sentença do ator
     # A palavra Quando/When também deve estar presente nessa sentença
+    # A ação é válida caso tenha um verbo e um substantivo e um pronome ou preposição ou advérbio
     def retorna_acao_cenario(self, tags):
         verbo = False
         substantivo = False
@@ -663,13 +662,9 @@ class UtilsService():
         return Constantes.ERRO_ACAO_INCONSISTENTE_2
         
     
-    # Conforme layout de Cohn, uma história de usuário deve ser escrita em no máximo 3 sentenças, 
-    # a finalidade é opcional, mas caso ocorra deverá ser identificada na terceira sentença
-    def retorna_finalidade_historia(self, tags):
-            return utils.valida_finalidade_historia(tags)
-   
     # Conforme o layout de cenário (Dado/Quando/Então), a finalidade deverá ser identificada em uma sentença posterior a sentença do ator e da ação
     # A palavra Então/Then também deve estar presente nessa sentença
+    # A finalidade é valida caso tenha um verbo e um pronome ou preposição ou substantivo ou advérbio
     def retorna_finalidade_cenario(self, tags):
         finalidade = ''
         verbo = False
@@ -701,12 +696,15 @@ class UtilsService():
         
         return Constantes.ERRO_FINALIDADE_INCONSISTENTE_2
     
+    
     # Função responsável para validar se há conjunções na validação do critério de qualidade 2 (Atômica)
     def possui_conjuncao(self, palavra):
         return Constantes.CONJUNCOES_C2.__contains__(palavra.lower())
     
+    
     # Função responsável para validar se há caracter inválido na validação do critério de qualidade 3 (Mínima)
     def possui_carcater_invalido(self, caracter):
         return Constantes.CARACTERES_INVALIDOS.__contains__(caracter)
+    
 
 utils = UtilsService()

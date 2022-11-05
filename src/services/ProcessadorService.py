@@ -4,7 +4,8 @@ from src.services.SpacyService import SpacyService
 class ProcessadorService():
     
     def __init__(self):
-        pass    
+        pass   
+     
     
     def processar(self, payload, type):
         
@@ -23,5 +24,6 @@ class ProcessadorService():
                 response.append(SpacyService.processarCenario(idioma, cenario))
                 
         return response
+    
 
 processador = ProcessadorService()

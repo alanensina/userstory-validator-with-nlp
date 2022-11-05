@@ -86,7 +86,7 @@ class NLTKService():
             precondicao = utils.extrair_preCondicao(sentencas_processadas[0])    
             acao = utils.extrair_acao(sentencas_processadas[1])     
             finalidade = utils.extrair_finalidade(sentencas_processadas[2]) 
-            erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, utils.retorna_precondicao_cenario(sentencas_processadas[0]), utils.retorna_acao_cenario(sentencas_processadas[1]), utils.retorna_finalidade_cenario(sentencas_processadas[2]))        
+            erros = utils.verifica_erros_cenario(bem_formada, atomica, minima, utils.valida_precondicao_cenario(sentencas_processadas[0]), utils.retorna_acao_cenario(sentencas_processadas[1]), utils.retorna_finalidade_cenario(sentencas_processadas[2]))        
             end = timeit.default_timer()  
             tempo = utils.formatar_tempo(start, end)
 
@@ -133,7 +133,6 @@ class NLTKService():
     # Tagging dos lemas das palavras
     def tagging(lemmas, idioma:str):
         ptbr_tagger_brill = joblib.load('POS_tagger_brill.pkl')
-        #ptbr_tagger_trigram = joblib.load('POS_tagger_trigram.pkl')   
         tags = []
         
         if idioma == Constantes.EN:

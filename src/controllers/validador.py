@@ -6,7 +6,9 @@ from src.models.cenario import cenario
 from src.models.response import response_historia, response_cenario
 from src.services.ProcessadorService import processador
 
+
 app, api = server.app, server.api
+
 
 @api.route('/historia')
 class AnalisarHistoria(Resource):
@@ -15,6 +17,7 @@ class AnalisarHistoria(Resource):
     def post(self, ):
         payload = api.payload   
         return processador.processar(payload, 'historia')
+    
     
 @api.route('/cenario')
 class AnalisarCenario(Resource):
