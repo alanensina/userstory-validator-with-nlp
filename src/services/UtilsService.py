@@ -89,7 +89,7 @@ class UtilsService():
     
     
     def verifica_substantivo(tagset):
-        return tagset == 'N' or tagset == 'NOUN' or tagset == 'NPROP' or tagset == 'NN' or tagset == 'NNP' or tagset == 'NNS' or tagset == 'PROPN'
+        return tagset == 'N' or tagset == 'NOUN' or tagset == 'NPROP' or tagset == 'NN' or tagset == 'NNP' or tagset == 'NNS' or tagset == 'PROPN' or tagset == 'NNPS' or tagset == 'N|EST'
     
     
     def verifica_conjuncao(tagset):
@@ -105,11 +105,11 @@ class UtilsService():
     
     
     def verifica_preposicao(tagset):
-        return tagset == 'PREP' or tagset == 'PRP' or tagset == 'TO' or tagset == 'ADP'
+        return tagset == 'PREP' or tagset == 'PRP' or tagset == 'TO' or tagset == 'ADP' or tagset == 'PREP|+'
     
     
     def verifica_artigo(tagset):
-        return tagset == 'ART' or tagset == 'DET' or tagset == 'DT' or tagset == 'WDT'
+        return tagset == 'ART' or tagset == 'DET' or tagset == 'DT' or tagset == 'WDT' or tagset == 'PDT'
 
 
     def verifica_erro_separacao(self, erro):
