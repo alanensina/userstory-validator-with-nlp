@@ -89,7 +89,7 @@ class UtilsService():
     
     
     def verifica_substantivo(tagset):
-        return tagset == 'N' or tagset == 'NOUN' or tagset == 'NPROP' or tagset == 'NN' or tagset == 'NNP' or tagset == 'NNS'
+        return tagset == 'N' or tagset == 'NOUN' or tagset == 'NPROP' or tagset == 'NN' or tagset == 'NNP' or tagset == 'NNS' or tagset == 'PROPN'
     
     
     def verifica_conjuncao(tagset):
