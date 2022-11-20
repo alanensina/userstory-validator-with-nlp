@@ -93,7 +93,7 @@ class UtilsService():
     
     
     def verifica_conjuncao(tagset):
-        return tagset == 'KC' or tagset == 'KS' or tagset == 'CONJ' or tagset == 'CC' or tagset == 'IN' or tagset == 'SCONJ'
+        return tagset == 'KC' or tagset == 'KS' or tagset == 'CONJ' or tagset == 'CC' or tagset == 'IN' or tagset == 'SCONJ' or tagset == 'CCONJ'
     
     
     def verifica_verbo(tagset):
