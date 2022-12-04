@@ -5,7 +5,7 @@
 ## _Requirements_
 - python 3.10+
 - pip 22.2+
-- Microsoft Visual C++ (apenas no Windows)
+- Microsoft Visual C++ (only Windows)
 
 ## _Description_
 <p> This API is in charge to evaluate user stories written using Mike Cohn's template and Gherkin's template. Stories are evaluated with three syntactic quality criteria:
